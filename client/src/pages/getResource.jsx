@@ -1,9 +1,42 @@
-'use client'
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
-// Previous utility functions remain unchanged
+// Branch mapping
+const BRANCH_CODES = {
+  "03": "Computer Engineering",
+  // Add other branch codes as needed
+};
+
+// Calculate semester based on admission year
+const calculateSemester = (admissionYear) => {
+  const currentYear = new Date().getFullYear() % 100; // Get last 2 digits of current year
+  const yearDiff = currentYear - admissionYear;
+  const semester = (yearDiff * 2); // Each year has 2 semesters
+  
+  // Return valid semester (2,4,6) or default to earliest available
+  if (semester === 2 || semester === 4 || semester === 6) {
+    return semester.toString();
+  }
+  return "2"; // Default to earliest semester if calculation is invalid
+};
+
+// Process MIS number to extract information
+const processMIS = (mis) => {
+  if (!mis || mis.length !== 9) return null;
+  
+  const misString = mis.toString();
+  const year = parseInt(misString.substring(2, 4)); // First 2 digits
+  const branchCode = misString.substring(4, 6); // Next 2 digits
+  console.log('Year:', year);
+  console.log('Branch Code:', branchCode);
+  
+  return {
+    branch: BRANCH_CODES[branchCode] || "",
+    semester: calculateSemester(year)
+  };
+};
+
+// Extract playlist ID from YouTube URL
 const extractPlaylistId = (url) => {
   const regex = /list=([a-zA-Z0-9_-]+)/;
   const match = url.match(regex);
@@ -13,7 +46,7 @@ const extractPlaylistId = (url) => {
 const branches = [
   "Computer Engineering",
 ];
-const semesters = ["2","4"];
+const semesters = ["2", "4", "6"];
 
 function LoadingSkeleton() {
   return (
@@ -105,6 +138,7 @@ function ResourceList({ selectedSubject, filteredResources }) {
   )
 }
 
+
 const FetchResourcesPage = () => {
   const [formData, setFormData] = useState({ branch: "", semester: "" })
   const [resources, setResources] = useState([])
@@ -113,17 +147,11 @@ const FetchResourcesPage = () => {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  const handleInputChange = (name, value) => {
-    setFormData({ ...formData, [name]: value })
-  }
-
-  const fetchResources = async (e) => {
-    e.preventDefault()
+  const fetchResources = async (branch, semester) => {
     setLoading(true)
     setError(null)
 
     try {
-      const { branch, semester } = formData
       const response = await fetch(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/resources?branch=${branch}&semester=${semester}`
       )
@@ -141,6 +169,40 @@ const FetchResourcesPage = () => {
     } finally {
       setLoading(false)
     }
+  }
+  useEffect(() => {
+    // Try to get and process token on component mount
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        const mis = decodedToken.mis;
+        
+        const misInfo = processMIS(mis);
+        if (misInfo && misInfo.branch && misInfo.semester) {
+          // Set form data
+          setFormData({
+            branch: misInfo.branch,
+            semester: misInfo.semester
+          });
+          
+          // Immediately fetch resources
+          fetchResources(misInfo.branch, misInfo.semester);
+        }
+      }
+    } catch (err) {
+      console.error('Error processing token:', err);
+    }
+  }, []);
+
+  const handleInputChange = (name, value) => {
+    setFormData({ ...formData, [name]: value })
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const { branch, semester } = formData
+    fetchResources(branch, semester)
   }
 
   const filteredResources = resources.filter(
@@ -164,18 +226,19 @@ const FetchResourcesPage = () => {
           </p>
         </div>
         <div className="p-6">
-          <form onSubmit={fetchResources} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-300">
                 Branch
               </label>
               <select
                 className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none
-                  bg-gray-700 border-gray-600 text-gray-100"
+                  bg-gray-700 border-gray-600 text-gray-100 cursor-not-allowed"
                 onChange={(e) => handleInputChange("branch", e.target.value)}
                 value={formData.branch}
+                disabled
               >
-                <option value="" className="text-gray-400">
+                <option value="" className="text-gray-400 cursor-not-allowed">
                   Select a Branch
                 </option>
                 {branches.map((branch) => (
@@ -192,9 +255,11 @@ const FetchResourcesPage = () => {
               </label>
               <select
                 className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none
-                  bg-gray-700 border-gray-600 text-gray-100"
+                  bg-gray-700 border-gray-600 text-gray-100 cursor-not-allowed"
                 onChange={(e) => handleInputChange("semester", e.target.value)}
                 value={formData.semester}
+                disabled
+
               >
                 <option value="" className="text-gray-400">
                   Select a Semester
@@ -300,4 +365,3 @@ const FetchResourcesPage = () => {
 }
 
 export default FetchResourcesPage
-
