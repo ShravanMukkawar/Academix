@@ -182,15 +182,15 @@ const CalendarComponent = () => {
 
   return (
     <motion.div
-      className="min-h-screen bg-gradient-to-b from-[#001233] to-[#001845]"
+      className="min-h-[calc(100vh-6rem)] bg-gradient-to-b from-[#001233] to-[#001845]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
       <div className="bg-yellow-200 mx-4 mt-2 p-2 rounded-lg text-black text-xs flex items-center justify-center gap-1">
         <AlertTriangle size={12} className="text-black flex-shrink-0" />
-        <p className="flex-1 text-center">
-          Events subject to change. Check official calendar.
+        <p >
+          Events subject to change. <a href="https://www.coeptech.ac.in/student-corner/academic/academic-calendar/"><strong className="text-black"> Check official calendar.</strong></a>
         </p>
       </div>
 

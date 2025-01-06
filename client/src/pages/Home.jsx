@@ -60,7 +60,7 @@ const Home = () => {
 
     return (
         <motion.div 
-            className=" min-h-screen bg-gradient-to-b from-[#001233] to-[#001845]"
+            className=" min-h-[calc(100vh-5rem)] bg-gradient-to-b from-[#001233] to-[#001845]"
             initial="hidden"
             animate="visible"
             variants={containerVariants}

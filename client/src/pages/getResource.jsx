@@ -148,7 +148,7 @@ const FetchResourcesPage = () => {
   )
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8 transition-colors bg-gray-900">
+    <div className="min-h-[calc(100vh-5rem)] flex flex-col items-center justify-center p-8 transition-colors bg-gradient-to-b from-[#001233] to-[#001845]">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
