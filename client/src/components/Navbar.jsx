@@ -1,10 +1,54 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSelector, useDispatch } from 'react-redux';
+import Avatar from './Avatar';
+import { logout } from '../redux/userSlice';
 
 const Navbar = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const user = useSelector((state) => state.user.user);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        checkAuth();
+    }, []);
+
+    const checkAuth = () => {
+        const token = localStorage.getItem('token');
+        const storedUser = localStorage.getItem('user');
+
+        if (!token || !storedUser) {
+            handleLogout();
+            return;
+        }
+
+        try {
+            const parsedUser = JSON.parse(storedUser);
+            if (parsedUser && Object.keys(parsedUser).length > 0) {
+                setIsAuthenticated(true);
+            } else {
+                handleLogout();
+            }
+        } catch (error) {
+            console.error('Error parsing user data:', error);
+            handleLogout();
+        }
+    };
+
+    const handleLogout = () => {
+        dispatch(logout());
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setIsAuthenticated(false);
+        navigate('/');
+    };
+    useEffect(() => {
+        checkAuth();
+    }, [user]); 
 
     const linkVariants = {
         hover: {
@@ -162,6 +206,51 @@ const Navbar = () => {
                                 )}
                             </AnimatePresence>
                         </motion.div>
+
+                        {/* User Section */}
+                        {isAuthenticated && user ? (
+                            <div className="relative">
+                                <div className="flex items-center cursor-pointer" onClick={() => setDropdownOpen(!dropdownOpen)}>
+                                    <span className="text-gray-300 px-3 py-2 rounded-md text-xl font-medium">
+                                        Hello, {user.name.split(' ')[0]}
+                                    </span>
+                                    <Avatar width={40} height={40} name={user.name} imageUrl={user.profilePic}/>
+                                </div>
+                                <AnimatePresence>
+                                    {dropdownOpen && (
+                                        <motion.div
+                                            className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 z-50"
+                                            variants={dropdownVariants}
+                                            initial="closed"
+                                            animate="open"
+                                            exit="closed"
+                                        >
+                                            <button
+                                                onClick={() => navigate('/profile')}
+                                                className="block w-full px-4 py-2 text-left text-gray-300 hover:bg-gray-700 transition-colors duration-200"
+                                            >
+                                                Profile
+                                            </button>
+                                            <button
+                                                onClick={handleLogout}
+                                                className="block w-full px-4 py-2 text-left text-gray-300 hover:bg-gray-700 transition-colors duration-200"
+                                            >
+                                                Logout
+                                            </button>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        ) : (
+                            <motion.div variants={linkVariants} whileHover="hover" whileTap="tap">
+                                <button
+                                    onClick={() => navigate('/signin')}
+                                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                                >
+                                    Login
+                                </button>
+                            </motion.div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -225,6 +314,7 @@ const Navbar = () => {
                                 MIS Login
                             </a>
                         </div>
+                        
                     </motion.div>
                 )}
             </AnimatePresence>

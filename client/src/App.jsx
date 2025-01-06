@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Navbar from './pages/Navbar'; // Import Navbar
+import Navbar from './components/Navbar'; // Import Navbar
 import YouTubePlaylist from './pages/YouTubePlaylist';
 import FileUpload from './pages/upload.jsx';
 import Home from './pages/Home';
@@ -10,6 +10,12 @@ import UpdateResourcesPage from './pages/UpdateResource.jsx';
 import CalendarComponent from './pages/Calendar.jsx';
 import { Analytics } from "@vercel/analytics/react"
 import ProtectedRoute from "./utils/ProtectedRoute.jsx"; 
+import SignUp from './pages/SignUp.jsx';
+import Temp from './pages/temp.jsx';
+import VerifyOtp from './pages/VerifyOtp.jsx';
+import SignIn from './pages/SignIn.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
 
 const App = () => {
   const requiredPassword = import.meta.env.VITE_REACT_APP_PASSWORD;
@@ -37,6 +43,11 @@ const App = () => {
             />
             {/* <Route path="/updater" element={<UpdateResourcesPage />} /> */}
             <Route path="/yt/:id" element={<YouTubePlaylist />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/verify-otp" element={<VerifyOtp />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:id" element={<ResetPassword />} />
+            <Route path="/signin" element={<SignIn />} />
             <Route path="/" element={<Home />} />
             <Route path="/getr" element={<FetchResourcesPage />} />
             <Route path="/seefeedback" element={<FeedbackPage />} />
