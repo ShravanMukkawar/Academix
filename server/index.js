@@ -9,6 +9,8 @@ const dropRouter = require('./routes/dropRoutes')
 const eventRouter = require('./routes/eventRoutes');
 const visitorRoutes = require('./routes/visitorCountRoutes');
 const userRouter = require('./routes/userRoutes');
+const blogRouter = require('./routes/blogRoutes');
+const commentRouter = require('./routes/commentRoutes');
 
 const AppError = require('./utils/appError'); // Import AppError
 
@@ -39,6 +41,8 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use('/api/v1/resources', resourseRouter);
 app.use('/api/v1/events', eventRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/blogs', blogRouter);
+app.use('/api/v1/comments', commentRouter);
 app.use('/api', dropRouter)
 app.use('/api', visitorRoutes);
 app.get('/', (request, response) => {

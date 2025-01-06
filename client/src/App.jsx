@@ -16,6 +16,9 @@ import VerifyOtp from './pages/VerifyOtp.jsx';
 import SignIn from './pages/SignIn.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
+import CreateBlog from './pages/CreateBlog.jsx';
+import BlogListing from './pages/GetAllBlogs.jsx';
+import SingleBlog from './pages/BlogPage.jsx';
 
 const App = () => {
   const requiredPassword = import.meta.env.VITE_REACT_APP_PASSWORD;
@@ -53,6 +56,9 @@ const App = () => {
             <Route path="/seefeedback" element={<FeedbackPage />} />
             <Route path="/sfeedback" element={<FeedbackForm />} />
             <Route path="/calendar" element={<CalendarComponent />} />
+            <Route path="/createBlog" element={<CreateBlog />} />
+            <Route path="/blogs" element={<BlogListing />} />
+            <Route path="/blogs/:blogId" element={<SingleBlog />} />
           </Routes>
         </div>
       </div>
