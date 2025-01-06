@@ -7,7 +7,7 @@ const AppError = require('../utils/appError');
 const { promisify } = require('util');
 const nodemailer = require('nodemailer')
 const sendEmail = require('./../utils/email');
-const { passwordResetEmail } = require('./../helpers/passwordResetEmail');
+const { passwordResetEmail, otpVerificationEmail } = require('./../helpers/EmailTemplate');
 const crypto = require('crypto');
 
 function generateRandomString(length) {
@@ -70,6 +70,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     const EmailotpExpires = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
     const randomString = generateRandomString(6);
     const modifiedEmail = "notverified" + randomString + email;
+    const modifiedMIS = "notverified" + randomString + mis;
     // Create new user with hashed OTP and its expiration
     const newUser = await User.create({
         name,
@@ -78,10 +79,11 @@ exports.signup = catchAsync(async (req, res, next) => {
         password,
         passwordConfirm,
         role: "User",
-        mis,
+        mis: modifiedMIS,
         Emailotp: hashedOtp,
         EmailotpExpires
     });
+
     console.log(newUser);
 
     // Send the original OTP via email
@@ -89,9 +91,9 @@ exports.signup = catchAsync(async (req, res, next) => {
     console.log(message);
     try {
         // await sendEmail({
-        //     email: tempUser.email,
+        //     email: email,
         //     subject: 'Your OTP for Signup (valid for 10 min)',
-        //     message
+        //     html: otpVerificationEmail(name, Emailotp)
         // });
 
     } catch (err) {
@@ -134,6 +136,8 @@ exports.verifyOtp = catchAsync(async (req, res, next) => {
         .digest('hex');
     const realEmail = decoded.email;
     const realEmail1 = realEmail.slice(17); // Adjust based on your slicing logic
+    const realMIS = decoded.mis;
+    const realMIS1 = realMIS.slice(17); // Adjust based on your slicing logic
     const user = await User.findOne({ email: realEmail1 }); // Use await to resolve the promise
 
     console.log(decoded.email);
@@ -163,7 +167,7 @@ exports.verifyOtp = catchAsync(async (req, res, next) => {
     }
     await User.findByIdAndUpdate(
         oldUser._id,            // Find the user by their ID
-        { email: realEmail1 }   // Update the email field with `realEmail1`
+        { email: realEmail1, mis: realMIS1 }   // Update the email field with `realEmail1`
     );
     oldUser.email = realEmail1;
     res.status(200).clearCookie('token').json({
@@ -232,11 +236,11 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`
     console.log(resetURL);
     try {
-        await sendEmail({
-            email: user.email,
-            subject: 'Your password reset token (valid for 10 min)',
-            html: passwordResetEmail(user, resetURL)
-        });
+        // await sendEmail({
+        //     email: user.email,
+        //     subject: 'Your password reset token (valid for 10 min)',
+        //     html: passwordResetEmail(user, resetURL)
+        // });
         console.log("😒😒😒😒", resetToken);
         res.status(200).json({
             status: 'success',

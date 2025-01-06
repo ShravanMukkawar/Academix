@@ -22,7 +22,10 @@ app.use(cookieParser());
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173', // Replace with your frontend's origin
+    credentials: true,              // Allow credentials (cookies, authorization headers)
+}));
 
 app.use((req, res, next) => {
     console.log("HI i am middleware 😀");

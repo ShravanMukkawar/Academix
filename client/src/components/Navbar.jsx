@@ -44,7 +44,6 @@ const Navbar = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setIsAuthenticated(false);
-        navigate('/');
     };
     useEffect(() => {
         checkAuth();
