@@ -260,6 +260,36 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     }
 });
 
+exports.getNameByMIS = async (req, res) => {
+    try {
+        const { mis } = req.params;
+
+        // 1. Find the user by their MIS
+        const user = await User.findOne({ mis });
+        console.log(user.name)
+        // 2. Check if the user exists
+        if (!user) {
+            return res.status(404).json({
+                status: 'fail',
+                message: `No user found with MIS: ${mis}`,
+            });
+        }
+
+        // 3. Return the user's name
+        res.status(200).json({
+            status: 'success',
+            data: {
+                name: user.name,
+            },
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: 'error',
+            message: 'Something went wrong!',
+        });
+    }
+};
+  
 exports.resetPassword = catchAsync(async (req, res, next) => {
     // 1) Get user based on the token
     const hashedToken = crypto

@@ -16,6 +16,7 @@ import VerifyOtp from './pages/VerifyOtp.jsx';
 import SignIn from './pages/SignIn.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
+import ProfessionalProfile from './pages/Profile.jsx';
 
 const App = () => {
   const requiredPassword = import.meta.env.VITE_REACT_APP_PASSWORD;
@@ -53,6 +54,7 @@ const App = () => {
             <Route path="/seefeedback" element={<FeedbackPage />} />
             <Route path="/sfeedback" element={<FeedbackForm />} />
             <Route path="/calendar" element={<CalendarComponent />} />
+            <Route path="/profile" element={<ProfessionalProfile/>} />
           </Routes>
         </div>
       </div>

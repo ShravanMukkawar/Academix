@@ -162,52 +162,10 @@ const Navbar = () => {
                                 Feedback
                             </Link>
                         </motion.div>
-                        
-                        <motion.div
-                            className="relative flex items-center"
-                            onMouseEnter={() => setDropdownOpen(true)}
-                            onMouseLeave={() => setDropdownOpen(false)}
-                        >
-                            <motion.div
-                                className="text-gray-300 px-3 py-2 rounded-md text-xl font-medium cursor-pointer hover:bg-gray-700 transition-colors duration-200"
-                                variants={linkVariants}
-                                whileHover="hover"
-                                whileTap="tap"
-                            >
-                                Useful Links
-                            </motion.div>
-                            <AnimatePresence>
-                                {dropdownOpen && (
-                                    <motion.div
-                                        className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800/95 backdrop-blur-sm ring-1 ring-black ring-opacity-5 top-full z-50"
-                                        variants={dropdownVariants}
-                                        initial="closed"
-                                        animate="open"
-                                        exit="closed"
-                                    >
-                                        <a
-                                            href="https://moodle.coep.org.in/moodle/login/index.php"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="block px-4 py-2 text-gray-300 hover:bg-gray-700 transition-colors duration-200 text-lg font-medium"
-                                        >
-                                            Moodle Login
-                                        </a>
-                                        <a
-                                            href="http://portalcoeptech.coep.org.in/SignUp?ReturnUrl=%2f"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="block px-4 py-2 text-gray-300 hover:bg-gray-700 transition-colors duration-200 text-lg font-medium"
-                                        >
-                                            MIS Login
-                                        </a>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </motion.div>
-
+                        <motion.div onMouseEnter={() => setDropdownOpen(true)} onMouseLeave={() => setDropdownOpen(false)} >
                         {/* User Section */}
                         {isAuthenticated && user ? (
+
                             <div className="relative">
                                 <div className="flex items-center cursor-pointer" onClick={() => setDropdownOpen(!dropdownOpen)}>
                                     <span className="text-gray-300 px-3 py-2 rounded-md text-xl font-medium">
@@ -216,31 +174,36 @@ const Navbar = () => {
                                     <Avatar width={40} height={40} name={user.name} imageUrl={user.profilePic}/>
                                 </div>
                                 <AnimatePresence>
-                                    {dropdownOpen && (
-                                        <motion.div
-                                            className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 z-50"
-                                            variants={dropdownVariants}
-                                            initial="closed"
-                                            animate="open"
-                                            exit="closed"
+                                {dropdownOpen && (
+                                    <motion.div
+                                        className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800/95 backdrop-blur-sm ring-1 ring-black ring-opacity-5 top-full z-50"
+                                         variants={dropdownVariants}
+                                        initial="closed"
+                                        animate="open"
+                                        exit="closed"
+                                    >
+                                        <a
+                                            href="/profile"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="block px-4 py-2 text-gray-300 hover:bg-gray-700 transition-colors duration-200 text-lg font-medium"
                                         >
-                                            <button
-                                                onClick={() => navigate('/profile')}
-                                                className="block w-full px-4 py-2 text-left text-gray-300 hover:bg-gray-700 transition-colors duration-200"
-                                            >
-                                                Profile
-                                            </button>
-                                            <button
-                                                onClick={handleLogout}
-                                                className="block w-full px-4 py-2 text-left text-gray-300 hover:bg-gray-700 transition-colors duration-200"
-                                            >
-                                                Logout
-                                            </button>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                            Profile
+                                        </a>
+                                        <a
+                                            onClick={handleLogout}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="block px-4 py-2 text-gray-300 hover:bg-gray-700 transition-colors duration-200 text-lg font-medium"
+                                        >
+                                            logout
+                                        </a>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                             </div>
-                        ) : (
+                         
+                        ): (
                             <motion.div variants={linkVariants} whileHover="hover" whileTap="tap">
                                 <button
                                     onClick={() => navigate('/signin')}
@@ -249,7 +212,7 @@ const Navbar = () => {
                                     Login
                                 </button>
                             </motion.div>
-                        )}
+                        )}</motion.div>
                     </div>
                 </div>
             </div>
@@ -294,24 +257,6 @@ const Navbar = () => {
                             >
                                 Feedback
                             </Link>
-                            <a
-                                href="https://moodle.coep.org.in/moodle/login/index.php"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-gray-300 block px-3 py-2 rounded-md text-lg font-medium hover:bg-gray-700 transition-colors duration-200"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                Moodle Login
-                            </a>
-                            <a
-                                href="http://portalcoeptech.coep.org.in/SignUp?ReturnUrl=%2f"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-gray-300 block px-3 py-2 rounded-md text-lg font-medium hover:bg-gray-700 transition-colors duration-200"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                MIS Login
-                            </a>
                         </div>
                         
                     </motion.div>
@@ -322,3 +267,12 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+
+
+
+
+
+
+
+

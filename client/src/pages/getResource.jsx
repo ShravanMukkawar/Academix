@@ -1,34 +1,25 @@
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 
-// Branch mapping
 const BRANCH_CODES = {
   "03": "Computer Engineering",
-  // Add other branch codes as needed
 };
 
-// Calculate semester based on admission year
 const calculateSemester = (admissionYear) => {
-  const currentYear = new Date().getFullYear() % 100; // Get last 2 digits of current year
+  const currentYear = new Date().getFullYear() % 100;
   const yearDiff = currentYear - admissionYear;
-  const semester = (yearDiff * 2); // Each year has 2 semesters
+  const semester = yearDiff * 2;
   
-  // Return valid semester (2,4,6) or default to earliest available
-  if (semester === 2 || semester === 4 || semester === 6) {
-    return semester.toString();
-  }
-  return "2"; // Default to earliest semester if calculation is invalid
+  return [2, 4, 6].includes(semester) ? semester.toString() : "2";
 };
 
-// Process MIS number to extract information
 const processMIS = (mis) => {
   if (!mis || mis.length !== 9) return null;
   
   const misString = mis.toString();
-  const year = parseInt(misString.substring(2, 4)); // First 2 digits
-  const branchCode = misString.substring(4, 6); // Next 2 digits
-  console.log('Year:', year);
-  console.log('Branch Code:', branchCode);
+  const year = parseInt(misString.substring(2, 4));
+  const branchCode = misString.substring(4, 6);
   
   return {
     branch: BRANCH_CODES[branchCode] || "",
@@ -36,16 +27,13 @@ const processMIS = (mis) => {
   };
 };
 
-// Extract playlist ID from YouTube URL
 const extractPlaylistId = (url) => {
   const regex = /list=([a-zA-Z0-9_-]+)/;
   const match = url.match(regex);
   return match ? match[1] : null;
 };
 
-const branches = [
-  "Computer Engineering",
-];
+const branches = ["Computer Engineering"];
 const semesters = ["2", "4", "6"];
 
 function LoadingSkeleton() {
@@ -60,7 +48,7 @@ function LoadingSkeleton() {
         <div className="h-4 w-4/6 bg-gray-700 rounded" />
       </div>
     </div>
-  )
+  );
 }
 
 function ResourceList({ selectedSubject, filteredResources }) {
@@ -78,7 +66,7 @@ function ResourceList({ selectedSubject, filteredResources }) {
         </h2>
       </div>
       <div className="p-6">
-        <div className="h-[600px] overflow-y-auto pr-4">
+        <div className="h-96 overflow-y-auto pr-4">
           <ul className="space-y-6">
             {filteredResources.map((chapter) => (
               <motion.li
@@ -101,16 +89,14 @@ function ResourceList({ selectedSubject, filteredResources }) {
                         transition={{ delay: index * 0.1 }}
                         className="flex items-center"
                       >
-                        <span className="w-3 h-3 bg-blue-400 rounded-full mr-3"></span>
+                        <span className="w-3 h-3 bg-blue-400 rounded-full mr-3" />
                         {res.type === "youtube" ? (
-                          <a
-                            href={`/yt/${encodeURIComponent(
-                              extractPlaylistId(res.link) || ""
-                            )}?from=${res.from}&to=${res.to}`}
+                          <Link
+                            to={`/yt/${extractPlaylistId(res.link)}?from=${res.from}&to=${res.to}`}
                             className="text-blue-400 hover:text-blue-300 font-medium transition-colors hover:underline text-lg"
                           >
                             {res.type} - {res.linkName || res.link}
-                          </a>
+                          </Link>
                         ) : (
                           <a
                             href={res.link}
@@ -135,82 +121,120 @@ function ResourceList({ selectedSubject, filteredResources }) {
         </div>
       </div>
     </motion.div>
-  )
+  );
 }
 
-
 const FetchResourcesPage = () => {
-  const [formData, setFormData] = useState({ branch: "", semester: "" })
-  const [resources, setResources] = useState([])
-  const [subjects, setSubjects] = useState([])
-  const [selectedSubject, setSelectedSubject] = useState("")
-  const [error, setError] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [formData, setFormData] = useState({ branch: "", semester: "" });
+  const [resources, setResources] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [selectedSubject, setSelectedSubject] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const fetchResources = async (branch, semester) => {
-    setLoading(true)
-    setError(null)
-
+    setLoading(true);
+    setError(null);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/resources?branch=${branch}&semester=${semester}`
-      )
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch resources')
-      }
-      
-      const data = await response.json()
-      setResources(data || [])
-      const subjects = data.map((resource) => resource.subject.name)
-      setSubjects([...new Set(subjects)])
+      );
+      if (!response.ok) throw new Error("Failed to fetch resources");
+      const data = await response.json();
+      setResources(data || []);
+      const uniqueSubjects = [...new Set(data.map((resource) => resource.subject.name))];
+      setSubjects(uniqueSubjects);
     } catch (err) {
-      setError("An error occurred while fetching resources.")
+      setError("An error occurred while fetching resources.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
   useEffect(() => {
-    // Try to get and process token on component mount
-    try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const decodedToken = JSON.parse(atob(token.split('.')[1]));
-        const mis = decodedToken.mis;
-        
-        const misInfo = processMIS(mis);
-        if (misInfo && misInfo.branch && misInfo.semester) {
-          // Set form data
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+    
+    if (token) {
+      try {
+        const decodedToken = JSON.parse(atob(token.split(".")[1]));
+        const misInfo = processMIS(decodedToken.mis);
+        if (misInfo?.branch && misInfo?.semester) {
           setFormData({
             branch: misInfo.branch,
             semester: misInfo.semester
           });
-          
-          // Immediately fetch resources
           fetchResources(misInfo.branch, misInfo.semester);
         }
+      } catch (err) {
+        console.error("Error processing token:", err);
+        setIsLoggedIn(false);
       }
-    } catch (err) {
-      console.error('Error processing token:', err);
     }
   }, []);
 
-  const handleInputChange = (name, value) => {
-    setFormData({ ...formData, [name]: value })
-  }
-
   const handleSubmit = (e) => {
-    e.preventDefault()
-    const { branch, semester } = formData
-    fetchResources(branch, semester)
-  }
+    e.preventDefault();
+    const { branch, semester } = formData;
+    fetchResources(branch, semester);
+  };
 
   const filteredResources = resources.filter(
     (resource) => resource.subject.name === selectedSubject
-  )
+  );
+
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gradient-to-b from-[#001233] to-[#001845]">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-2xl bg-red-500/10 border border-red-500/20 rounded-2xl p-12 text-center backdrop-blur-sm"
+        >
+          <motion.h1 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-4xl font-bold text-red-400 mb-6"
+          >
+            Login Required
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-xl text-gray-300 mb-8"
+          >
+            Please login or sign up to access study resources
+          </motion.p>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="flex justify-center space-x-6"
+          >
+            <a 
+              href="/signin" 
+              className="px-8 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-lg hover:shadow-xl"
+            >
+              Login
+            </a>
+            <a 
+              href="/signup" 
+              className="px-8 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition-colors duration-300 shadow-lg hover:shadow-xl"
+            >
+              Sign Up
+            </a>
+          </motion.div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] flex flex-col items-center justify-center p-8 transition-colors bg-gradient-to-b from-[#001233] to-[#001845]">
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gradient-to-b from-[#001233] to-[#001845]">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -218,9 +242,7 @@ const FetchResourcesPage = () => {
         className="w-full max-w-md bg-gray-800 border-gray-700 rounded-2xl shadow-xl border mb-8"
       >
         <div className="p-6 border-b border-gray-700">
-          <h1 className="text-3xl font-bold text-blue-400">
-            Study Resources
-          </h1>
+          <h1 className="text-3xl font-bold text-blue-400">Study Resources</h1>
           <p className="mt-2 text-gray-400">
             Select your branch and semester to explore resources
           </p>
@@ -228,21 +250,15 @@ const FetchResourcesPage = () => {
         <div className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">
-                Branch
-              </label>
+              <label className="text-sm font-medium text-gray-300">Branch</label>
               <select
-                className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none
-                  bg-gray-700 border-gray-600 text-gray-100 cursor-not-allowed"
-                onChange={(e) => handleInputChange("branch", e.target.value)}
+                className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none bg-gray-700 border-gray-600 text-gray-100 cursor-not-allowed"
                 value={formData.branch}
                 disabled
               >
-                <option value="" className="text-gray-400 cursor-not-allowed">
-                  Select a Branch
-                </option>
+                <option value="">Select a Branch</option>
                 {branches.map((branch) => (
-                  <option key={branch} value={branch} className="text-gray-100">
+                  <option key={branch} value={branch}>
                     {branch}
                   </option>
                 ))}
@@ -250,22 +266,15 @@ const FetchResourcesPage = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">
-                Semester
-              </label>
+              <label className="text-sm font-medium text-gray-300">Semester</label>
               <select
-                className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none
-                  bg-gray-700 border-gray-600 text-gray-100 cursor-not-allowed"
-                onChange={(e) => handleInputChange("semester", e.target.value)}
+                className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none bg-gray-700 border-gray-600 text-gray-100 cursor-not-allowed"
                 value={formData.semester}
                 disabled
-
               >
-                <option value="" className="text-gray-400">
-                  Select a Semester
-                </option>
+                <option value="">Select a Semester</option>
                 {semesters.map((sem) => (
-                  <option key={sem} value={sem} className="text-gray-100">
+                  <option key={sem} value={sem}>
                     Semester {sem}
                   </option>
                 ))}
@@ -317,16 +326,13 @@ const FetchResourcesPage = () => {
           >
             <div className="p-6">
               <select
-                className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none
-                  bg-gray-700 border-gray-600 text-gray-100"
+                className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none bg-gray-700 border-gray-600 text-gray-100"
                 onChange={(e) => setSelectedSubject(e.target.value)}
                 value={selectedSubject}
               >
-                <option value="" className="text-gray-400">
-                  Select a Subject
-                </option>
+                <option value="">Select a Subject</option>
                 {subjects.map((subject, index) => (
-                  <option key={index} value={subject} className="text-gray-100">
+                  <option key={index} value={subject}>
                     {subject}
                   </option>
                 ))}
@@ -361,7 +367,7 @@ const FetchResourcesPage = () => {
         )}
       </AnimatePresence>
     </div>
-  )
-}
+  );
+};
 
-export default FetchResourcesPage
+export default FetchResourcesPage;
