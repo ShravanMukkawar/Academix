@@ -24,7 +24,8 @@ const createSendToken = (user, statusCode, req, res) => {
     const tokenData = {
         id: user._id,
         email: user.email,
-        role: user.role
+        // role: user.role,
+        mis: user.mis
     }
     const token = jwt.sign(tokenData, process.env.JWT_SECRET_KEY, {
         expiresIn: process.env.JWT_EXPIRES_IN
