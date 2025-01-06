@@ -77,7 +77,7 @@ const Home = () => {
                         </h2>
                         <div className="text-white/90 max-w-4xl mx-auto p-6 bg-[#001233]/50 rounded-xl">
                             <p className="text-lg leading-relaxed">
-                            Welcome to our Resources Hub! Initially focused on Computer Science students, we’ve gradually expanded to support all branches with academic materials,and contest updates. Stay ahead in your academic journey with us, and Don’t forget to share your feedback!
+                            Welcome to our Resources Hub! Initially focused on Computer Science students, we will gradually expanded to support all branches with academic material. Stay ahead in your academic journey with us, and Don’t forget to share your feedback!
                             </p>
                         </div>
                     </div>
