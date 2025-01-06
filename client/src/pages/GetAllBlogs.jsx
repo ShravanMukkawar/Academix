@@ -12,6 +12,7 @@ const BlogListing = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [filters, setFilters] = useState({
     search: '',
     tags: []
@@ -44,6 +45,8 @@ const BlogListing = () => {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
     fetchBlogs(currentPage);
   }, [currentPage, filters, sort]);
 
@@ -84,7 +87,65 @@ const BlogListing = () => {
     return `${formattedDate} ${formattedTime}`;
   };
   
-  
+  if (!isLoggedIn) {
+    if (loading) {
+      return (
+        <div className="min-h-screen bg-[#001233] flex justify-center items-center">
+          <motion.div 
+            className="w-8 h-8 border-4 border-[#00B4D8] border-t-transparent rounded-full"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
+        </div>
+      );
+    }
+     return (
+       <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gradient-to-b from-[#001233] to-[#001845]">
+         <motion.div
+           initial={{ opacity: 0, scale: 0.8 }}
+           animate={{ opacity: 1, scale: 1 }}
+           transition={{ duration: 0.5 }}
+           className="w-full max-w-2xl bg-red-500/10 border border-red-500/20 rounded-2xl p-12 text-center backdrop-blur-sm"
+         >
+           <motion.h1 
+             initial={{ opacity: 0, y: -20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 0.2 }}
+             className="text-4xl font-bold text-red-400 mb-6"
+           >
+             Login Required
+           </motion.h1>
+           <motion.p 
+             initial={{ opacity: 0, y: -20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 0.4 }}
+             className="text-xl text-gray-300 mb-8"
+           >
+             Please login or sign up to access Blogs Feature
+           </motion.p>
+           <motion.div 
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 0.6 }}
+             className="flex justify-center space-x-6"
+           >
+             <a 
+               href="/signin" 
+               className="px-8 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-lg hover:shadow-xl"
+             >
+               Login
+             </a>
+             <a 
+               href="/signup" 
+               className="px-8 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition-colors duration-300 shadow-lg hover:shadow-xl"
+             >
+               Sign Up
+             </a>
+           </motion.div>
+         </motion.div>
+       </div>
+     );
+   }  
 
   return (
     <div className="min-h-screen bg-[#001233] px-4 sm:px-6 lg:px-8 py-12">
