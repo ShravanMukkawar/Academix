@@ -1,63 +1,105 @@
-import { PiUserCircle } from "react-icons/pi";
+import React, { useMemo } from 'react';
+import { User } from 'lucide-react';
 
-const Avatar = ({  name, imageUrl, width, height }) => {
+const Avatar = ({ name, imageUrl, width = 40, height = 40, className = '' }) => {
+  const avatarName = useMemo(() => {
+    if (!name) return '';
+    const splitName = name.trim().split(' ');
+    return splitName.length > 1
+      ? `${splitName[0][0]}${splitName[1][0]}`.toUpperCase()
+      : splitName[0][0].toUpperCase();
+  }, [name]);
 
+  const colorVariants = {
+    0: 'bg-violet-500 hover:bg-violet-600',
+    1: 'bg-teal-500 hover:bg-teal-600',
+    2: 'bg-pink-500 hover:bg-pink-600',
+    3: 'bg-emerald-500 hover:bg-emerald-600',
+    4: 'bg-amber-500 hover:bg-amber-600',
+    5: 'bg-blue-500 hover:bg-blue-600',
+    6: 'bg-cyan-500 hover:bg-cyan-600',
+    7: 'bg-indigo-500 hover:bg-indigo-600',
+    8: 'bg-rose-500 hover:bg-rose-600'
+  };
 
-    let avatarName = ""
+  const colorIndex = useMemo(() => {
+    if (!name) return 0;
+    return name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 9;
+  }, [name]);
 
-    if (name) {
-        const splitName = name?.split(" ")
+  const baseStyles = `
+    inline-flex items-center justify-center 
+    rounded-full overflow-hidden 
+    transition-all duration-200 ease-in-out
+    ring-2 ring-offset-2 ring-offset-slate-900 
+    shadow-lg
+  `;
 
-        if (splitName.length > 1) {
-            avatarName = splitName[0][0] + splitName[1][0]
-        } else {
-            avatarName = splitName[0][0]
-        }
-    }
+  const dimensions = `w-[${width}px] h-[${height}px]`;
 
-    const bgColor = [
-        'bg-slate-400',
-        'bg-teal-400',
-        'bg-red-400',
-        'bg-green-400',
-        'bg-yellow-400',
-        'bg-gray-400',
-        "bg-cyan-400",
-        "bg-sky-400",
-        "bg-blue-400"
-    ]
-
-    const randomNumber = Math.floor(Math.random() * 9)
-
-
-
+  if (imageUrl && imageUrl !== "default.png") {
     return (
-        <div className={`text-slate-800  rounded-full font-bold relative`} style={{ width: width + "px", height: height + "px" }}>
-            {
-                (imageUrl && imageUrl!="default.png") ? (
-                    <img
-                        src={imageUrl}
-                        width={width}
-                        height={height}
-                        alt={name}
-                        className='overflow-hidden rounded-full'
-                    />
-                ) : (
-                    name ? (
-                        <div style={{ width: width + "px", height: height + "px" }} className={`overflow-hidden rounded-full flex justify-center items-center text-lg ${bgColor[randomNumber]}`}>
-                            {avatarName}
-                        </div>
-                    ) : (
-                        <PiUserCircle
-                            size={width}
-                        />
-                    )
-                )
-            }
-
-
+      <div 
+        className={`${baseStyles} ${dimensions} ${className} ring-slate-700 hover:ring-slate-600`}
+        style={{ width, height }}
+      >
+        <div className="relative w-full h-full group">
+          <img
+            src={imageUrl}
+            alt={name || 'User avatar'}
+            className="w-full h-full object-cover transform transition-transform duration-200 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-200" />
         </div>
-    )
-}
+      </div>
+    );
+  }
 
-export default Avatar
+  if (name) {
+    return (
+      <div
+        className={`
+          ${baseStyles} 
+          ${dimensions} 
+          ${colorVariants[colorIndex]}
+          ${className}
+          ring-slate-700
+          hover:ring-slate-600
+          cursor-default
+          font-semibold
+          text-white
+          transform hover:scale-105
+        `}
+        style={{ 
+          width, 
+          height,
+          fontSize: `${Math.max(width * 0.4, 14)}px`
+        }}
+      >
+        {avatarName}
+      </div>
+    );
+  }
+
+  return (
+    <div 
+      className={`
+        ${baseStyles} 
+        ${dimensions} 
+        ${className}
+        bg-slate-700 
+        hover:bg-slate-600
+        text-slate-300
+        hover:text-white
+        ring-slate-700
+        hover:ring-slate-600
+        transform hover:scale-105
+      `}
+      style={{ width, height }}
+    >
+      <User size={Math.max(width * 0.6, 16)} />
+    </div>
+  );
+};
+
+export default Avatar;

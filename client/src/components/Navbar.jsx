@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSelector, useDispatch } from 'react-redux';
+import axios from 'axios';
 import Avatar from './Avatar';
 import { logout } from '../redux/userSlice';
 
@@ -17,38 +18,62 @@ const Navbar = () => {
         checkAuth();
     }, []);
 
-    const checkAuth = () => {
+    const checkAuth = async () => {
         const token = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
-
-        if (!token || !storedUser) {
+        if (!token) {
             handleLogout();
             return;
         }
 
         try {
-            const parsedUser = JSON.parse(storedUser);
-            if (parsedUser && Object.keys(parsedUser).length > 0) {
+            const response = await axios.get(
+                `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/users/me`,
+                {
+                    withCredentials: true,
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            );
+
+            if (response.data.status === "success") {
                 setIsAuthenticated(true);
+                // Update Redux store with fresh user data from server
+                dispatch({
+                    type: 'user/setUser',
+                    payload: response.data.data.user
+                });
             } else {
                 handleLogout();
             }
         } catch (error) {
-            console.error('Error parsing user data:', error);
+            console.error('Error fetching user data:', error);
             handleLogout();
         }
     };
 
-    const handleLogout = () => {
-        dispatch(logout());
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setIsAuthenticated(false);
+    const handleLogout = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (token) {
+                await axios.post(
+                    `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/users/logout`,
+                    {},
+                    {
+                        withCredentials: true,
+                        headers: { Authorization: `Bearer ${token}` }
+                    }
+                );
+            }
+        } catch (error) {
+            console.error('Error during logout:', error);
+        } finally {
+            dispatch(logout());
+            localStorage.removeItem('token');
+            setIsAuthenticated(false);
+            navigate('/signin');
+        }
     };
-    useEffect(() => {
-        checkAuth();
-    }, [user]); 
 
+    // Rest of your animations and UI code remains the same
     const linkVariants = {
         hover: {
             scale: 1.05,
@@ -130,89 +155,75 @@ const Navbar = () => {
 
                     {/* Desktop Links */}
                     <div className="hidden sm:flex sm:items-center sm:space-x-4">
-                        <motion.div variants={linkVariants} whileHover="hover" whileTap="tap" className="flex items-center">
-                            <Link
-                                to="/"
-                                className="text-gray-300 px-3 py-2 rounded-md text-xl font-medium hover:bg-gray-700 transition-colors duration-200"
+                        {/* Navigation Links */}
+                        {['/', '/getr', '/calendar', '/sfeedback'].map((path, index) => (
+                            <motion.div
+                                key={path}
+                                variants={linkVariants}
+                                whileHover="hover"
+                                whileTap="tap"
+                                className="flex items-center"
                             >
-                                Home
-                            </Link>
-                        </motion.div>
-                        <motion.div variants={linkVariants} whileHover="hover" whileTap="tap" className="flex items-center">
-                            <Link
-                                to="/getr"
-                                className="text-gray-300 px-3 py-2 rounded-md text-xl font-medium hover:bg-gray-700 transition-colors duration-200"
-                            >
-                                Resources
-                            </Link>
-                        </motion.div>
-                        <motion.div variants={linkVariants} whileHover="hover" whileTap="tap" className="flex items-center">
-                            <Link
-                                to="/calendar"
-                                className="text-gray-300 px-3 py-2 rounded-md text-xl font-medium hover:bg-gray-700 transition-colors duration-200"
-                            >
-                                Calendar
-                            </Link>
-                        </motion.div>
-                        <motion.div variants={linkVariants} whileHover="hover" whileTap="tap" className="flex items-center">
-                            <Link
-                                to="/sfeedback"
-                                className="text-gray-300 px-3 py-2 rounded-md text-xl font-medium hover:bg-gray-700 transition-colors duration-200"
-                            >
-                                Feedback
-                            </Link>
-                        </motion.div>
-                        <motion.div onMouseEnter={() => setDropdownOpen(true)} onMouseLeave={() => setDropdownOpen(false)} >
-                        {/* User Section */}
-                        {isAuthenticated && user ? (
-
-                            <div className="relative">
-                                <div className="flex items-center cursor-pointer" onClick={() => setDropdownOpen(!dropdownOpen)}>
-                                    <span className="text-gray-300 px-3 py-2 rounded-md text-xl font-medium">
-                                        Hello, {user.name.split(' ')[0]}
-                                    </span>
-                                    <Avatar width={40} height={40} name={user.name} imageUrl={user.profilePic}/>
-                                </div>
-                                <AnimatePresence>
-                                {dropdownOpen && (
-                                    <motion.div
-                                        className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800/95 backdrop-blur-sm ring-1 ring-black ring-opacity-5 top-full z-50"
-                                         variants={dropdownVariants}
-                                        initial="closed"
-                                        animate="open"
-                                        exit="closed"
-                                    >
-                                        <a
-                                            href="/profile"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="block px-4 py-2 text-gray-300 hover:bg-gray-700 transition-colors duration-200 text-lg font-medium"
-                                        >
-                                            Profile
-                                        </a>
-                                        <a
-                                            onClick={handleLogout}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="block px-4 py-2 text-gray-300 hover:bg-gray-700 transition-colors duration-200 text-lg font-medium"
-                                        >
-                                            logout
-                                        </a>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                            </div>
-                         
-                        ): (
-                            <motion.div variants={linkVariants} whileHover="hover" whileTap="tap">
-                                <button
-                                    onClick={() => navigate('/signin')}
-                                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                                <Link
+                                    to={path}
+                                    className="text-gray-300 px-3 py-2 rounded-md text-xl font-medium hover:bg-gray-700 transition-colors duration-200"
                                 >
-                                    Login
-                                </button>
+                                    {path === '/' ? 'Home' : 
+                                     path === '/getr' ? 'Resources' :
+                                     path === '/calendar' ? 'Calendar' : 'Feedback'}
+                                </Link>
                             </motion.div>
-                        )}</motion.div>
+                        ))}
+
+                        {/* User Section */}
+                        <motion.div
+                            onMouseEnter={() => setDropdownOpen(true)}
+                            onMouseLeave={() => setDropdownOpen(false)}
+                        >
+                            {isAuthenticated && user ? (
+                                <div className="relative">
+                                    <div className="flex items-center cursor-pointer">
+                                        <span className="text-gray-300 px-3 py-2 rounded-md text-xl font-medium">
+                                            Hello, {user.name?.split(' ')[0]}
+                                        </span>
+                                        <Avatar width={40} height={40} name={user.name} imageUrl={user.profilePic} />
+                                    </div>
+                                    <AnimatePresence>
+                                        {dropdownOpen && (
+                                            <motion.div
+                                                className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800/95 backdrop-blur-sm ring-1 ring-black ring-opacity-5 top-full z-50"
+                                                variants={dropdownVariants}
+                                                initial="closed"
+                                                animate="open"
+                                                exit="closed"
+                                            >
+                                                <Link
+                                                    to="/profile"
+                                                    className="block px-4 py-2 text-gray-300 hover:bg-gray-700 transition-colors duration-200 text-lg font-medium"
+                                                >
+                                                    Profile
+                                                </Link>
+                                                <button
+                                                    onClick={handleLogout}
+                                                    className="w-full text-left px-4 py-2 text-gray-300 hover:bg-gray-700 transition-colors duration-200 text-lg font-medium"
+                                                >
+                                                    Logout
+                                                </button>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            ) : (
+                                <motion.div variants={linkVariants} whileHover="hover" whileTap="tap">
+                                    <button
+                                        onClick={() => navigate('/signin')}
+                                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200"
+                                    >
+                                        Login
+                                    </button>
+                                </motion.div>
+                            )}
+                        </motion.div>
                     </div>
                 </div>
             </div>
@@ -229,36 +240,42 @@ const Navbar = () => {
                         transition={{ duration: 0.3 }}
                     >
                         <div className="px-2 pt-2 pb-3 space-y-1 bg-gray-800">
-                            <Link
-                                to="/"
-                                className="text-gray-300 block px-3 py-2 rounded-md text-lg font-medium hover:bg-gray-700 transition-colors duration-200"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                Home
-                            </Link>
-                            <Link
-                                to="/getr"
-                                className="text-gray-300 block px-3 py-2 rounded-md text-lg font-medium hover:bg-gray-700 transition-colors duration-200"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                Resources
-                            </Link>
-                            <Link
-                                to="/calendar"
-                                className="text-gray-300 block px-3 py-2 rounded-md text-lg font-medium hover:bg-gray-700 transition-colors duration-200"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                Calendar
-                            </Link>
-                            <Link
-                                to="/sfeedback"
-                                className="text-gray-300 block px-3 py-2 rounded-md text-lg font-medium hover:bg-gray-700 transition-colors duration-200"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                Feedback
-                            </Link>
+                            {[
+                                { path: '/', label: 'Home' },
+                                { path: '/getr', label: 'Resources' },
+                                { path: '/calendar', label: 'Calendar' },
+                                { path: '/sfeedback', label: 'Feedback' }
+                            ].map((item) => (
+                                <Link
+                                    key={item.path}
+                                    to={item.path}
+                                    className="text-gray-300 block px-3 py-2 rounded-md text-lg font-medium hover:bg-gray-700 transition-colors duration-200"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    {item.label}
+                                </Link>
+                            ))}
+                            {isAuthenticated && user && (
+                                <>
+                                    <Link
+                                        to="/profile"
+                                        className="text-gray-300 block px-3 py-2 rounded-md text-lg font-medium hover:bg-gray-700 transition-colors duration-200"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        Profile
+                                    </Link>
+                                    <button
+                                        onClick={() => {
+                                            handleLogout();
+                                            setMobileMenuOpen(false);
+                                        }}
+                                        className="w-full text-left text-gray-300 px-3 py-2 rounded-md text-lg font-medium hover:bg-gray-700 transition-colors duration-200"
+                                    >
+                                        Logout
+                                    </button>
+                                </>
+                            )}
                         </div>
-                        
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -267,12 +284,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
-
-
-
-
-
-
-
-

@@ -16,13 +16,10 @@ import VerifyOtp from './pages/VerifyOtp.jsx';
 import SignIn from './pages/SignIn.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
-<<<<<<< HEAD
 import CreateBlog from './pages/CreateBlog.jsx';
 import BlogListing from './pages/GetAllBlogs.jsx';
 import SingleBlog from './pages/BlogPage.jsx';
-=======
 import ProfessionalProfile from './pages/Profile.jsx';
->>>>>>> 3e07c4f14f77adf13f6e5883bcc63794febc7003
 
 const App = () => {
   const requiredPassword = import.meta.env.VITE_REACT_APP_PASSWORD;
@@ -58,15 +55,12 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/getr" element={<FetchResourcesPage />} />
             <Route path="/seefeedback" element={<FeedbackPage />} />
-            <Route path="/sfeedback" element={<FeedbackForm />} />
+            <Route path="/sfeedback" el   ement={<FeedbackForm />} />
             <Route path="/calendar" element={<CalendarComponent />} />
-<<<<<<< HEAD
             <Route path="/createBlog" element={<CreateBlog />} />
             <Route path="/blogs" element={<BlogListing />} />
             <Route path="/blogs/:blogId" element={<SingleBlog />} />
-=======
             <Route path="/profile" element={<ProfessionalProfile/>} />
->>>>>>> 3e07c4f14f77adf13f6e5883bcc63794febc7003
           </Routes>
         </div>
       </div>
