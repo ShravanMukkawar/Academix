@@ -7,16 +7,16 @@ import Avatar from './Avatar';
 import { logout } from '../redux/userSlice';
 
 const Navbar = () => {
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const user = useSelector((state) => state.user.user);
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const user = useSelector((state) => state.user.user);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-    useEffect(() => {
-        checkAuth();
-    }, []);
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
     const checkAuth = async () => {
         const token = localStorage.getItem('token');
@@ -83,75 +83,75 @@ const Navbar = () => {
         tap: { scale: 0.95 },
     };
 
-    const mobileMenuVariants = {
-        closed: { opacity: 0, height: 0 },
-        open: { opacity: 1, height: 'auto' },
-    };
+  const mobileMenuVariants = {
+    closed: { opacity: 0, height: 0 },
+    open: { opacity: 1, height: "auto" },
+  };
 
-    const dropdownVariants = {
-        closed: { opacity: 0, y: -10, display: 'none' },
-        open: { opacity: 1, y: 0, display: 'block' },
-    };
+  const dropdownVariants = {
+    closed: { opacity: 0, y: -10, display: "none" },
+    open: { opacity: 1, y: 0, display: "block" },
+  };
 
-    return (
-        <nav className="bg-gray-900 shadow-lg">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="relative flex items-center justify-between h-20">
-                    {/* Mobile menu button */}
-                    <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
-                        <motion.button
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-colors duration-200"
-                            aria-expanded={mobileMenuOpen}
-                        >
-                            <span className="sr-only">Open main menu</span>
-                            <motion.svg
-                                className="block h-6 w-6"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                animate={mobileMenuOpen ? { rotate: 90 } : { rotate: 0 }}
-                                transition={{ duration: 0.3 }}
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M4 6h16M4 12h16M4 18h16"
-                                />
-                            </motion.svg>
-                        </motion.button>
-                    </div>
+  return (
+    <nav className="bg-gray-900 shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative flex items-center justify-between h-20">
+          {/* Mobile menu button */}
+          <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+            <motion.button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-colors duration-200"
+              aria-expanded={mobileMenuOpen}
+            >
+              <span className="sr-only">Open main menu</span>
+              <motion.svg
+                className="block h-6 w-6"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                animate={mobileMenuOpen ? { rotate: 90 } : { rotate: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </motion.svg>
+            </motion.button>
+          </div>
 
-                    {/* Logo */}
-                    <div className="flex-1 flex items-center justify-center sm:items-center sm:justify-start">
-                        <motion.div
-                            className="flex-shrink-0 text-white text-2xl font-bold"
-                            whileHover={{ scale: 1.05 }}
-                        >
-                            <Link to="/" className="flex items-center">
-                                <motion.svg
-                                    className="h-8 w-8 mr-2"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    whileHover={{ rotate: 360 }}
-                                    transition={{ duration: 0.5 }}
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M13 10V3L4 14h7v7l9-11h-7z"
-                                    />
-                                </motion.svg>
-                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
-                                    Academix
-                                </span>
-                            </Link>
-                        </motion.div>
-                    </div>
+          {/* Logo */}
+          <div className="flex-1 flex items-center justify-center sm:items-center sm:justify-start">
+            <motion.div
+              className="flex-shrink-0 text-white text-2xl font-bold"
+              whileHover={{ scale: 1.05 }}
+            >
+              <Link to="/" className="flex items-center">
+                <motion.svg
+                  className="h-8 w-8 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  whileHover={{ rotate: 360 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </motion.svg>
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+                  Academix
+                </span>
+              </Link>
+            </motion.div>
+          </div>
 
                     {/* Desktop Links */}
                     <div className="hidden sm:flex sm:items-center sm:space-x-4">

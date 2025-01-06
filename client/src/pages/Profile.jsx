@@ -8,15 +8,15 @@ import { updateProfilePic } from "../redux/userSlice";
 
 const ProfileSection = ({ title, value, icon }) => (
   <motion.div
-    className="bg-slate-800 p-6 rounded-lg shadow-xl mb-4 w-full"
+    className="bg-slate-800 p-4 sm:p-6 rounded-lg shadow-xl mb-4 w-full"
     whileHover={{ scale: 1.02 }}
     transition={{ duration: 0.2 }}
   >
-    <div className="flex items-center space-x-4">
-      <div className="p-3 bg-teal-500/10 rounded-full">{icon}</div>
-      <div className="flex-1">
-        <h3 className="text-teal-400 text-sm font-medium mb-1">{title}</h3>
-        <p className="text-slate-200 text-lg font-semibold">
+    <div className="flex items-center space-x-3 sm:space-x-4">
+      <div className="p-2 sm:p-3 bg-teal-500/10 rounded-full">{icon}</div>
+      <div className="flex-1 min-w-0">
+        <h3 className="text-teal-400 text-xs sm:text-sm font-medium mb-1">{title}</h3>
+        <p className="text-slate-200 text-base sm:text-lg font-semibold truncate">
           {value || "Not Available"}
         </p>
       </div>
@@ -159,15 +159,15 @@ const ProfessionalProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-slate-900 py-6 px-4 sm:py-12 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto w-full">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <h1 className="text-4xl font-bold text-teal-400 mb-2">Student Profile</h1>
-          <p className="text-slate-400">Your Academic Information Dashboard</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-teal-400 mb-2">Student Profile</h1>
+          <p className="text-sm sm:text-base text-slate-400">Your Academic Information Dashboard</p>
         </motion.div>
 
         {isLoggedIn ? (
@@ -226,7 +226,7 @@ const ProfessionalProfile = () => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center text-slate-400 p-8"
+            className="text-center text-slate-400 p-4 sm:p-8"
           >
             Please log in to view your profile information.
           </motion.div>
