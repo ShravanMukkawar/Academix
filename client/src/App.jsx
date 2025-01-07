@@ -20,6 +20,7 @@ import CreateBlog from './pages/CreateBlog.jsx';
 import BlogListing from './pages/GetAllBlogs.jsx';
 import SingleBlog from './pages/BlogPage.jsx';
 import ProfessionalProfile from './pages/Profile.jsx';
+import NotFound from './pages/NotFound.jsx';
 
 const App = () => {
   const requiredPassword = import.meta.env.VITE_REACT_APP_PASSWORD;
@@ -55,12 +56,13 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/getr" element={<FetchResourcesPage />} />
             <Route path="/seefeedback" element={<FeedbackPage />} />
-            <Route path="/sfeedback" el   ement={<FeedbackForm />} />
+            <Route path="/sfeedback" element={<FeedbackForm />} />
             <Route path="/calendar" element={<CalendarComponent />} />
             <Route path="/createBlog" element={<CreateBlog />} />
             <Route path="/blogs" element={<BlogListing />} />
             <Route path="/blogs/:blogId" element={<SingleBlog />} />
             <Route path="/profile" element={<ProfessionalProfile/>} />
+            <Route path="/*" element={<NotFound/>} />
           </Routes>
         </div>
       </div>

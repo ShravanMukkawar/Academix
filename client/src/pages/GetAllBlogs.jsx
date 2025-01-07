@@ -1,10 +1,10 @@
 //search blog not working
 //work on it
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Clock, X, Search, SortAsc } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Clock, X, Search, SortAsc, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const BlogListing = () => {
@@ -13,16 +13,19 @@ const BlogListing = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
   const [filters, setFilters] = useState({
     search: '',
     tags: []
   });
   const [sort, setSort] = useState('-createdAt');
   const [tagInput, setTagInput] = useState('');
-
+  const navigate=useNavigate();
   const fetchBlogs = async (page) => {
     try {
-      const tagsQuery = filters.tags.length ? `&tags=${filters.tags.join(',')}` : '';
+      const tagsQuery = filters.tags.length 
+        ? `&tags=${filters.tags.map(tag => tag.toLowerCase()).join(',')}` 
+        : '';
       const searchQuery = filters.search ? `&search=${filters.search}` : '';
 
       
@@ -263,14 +266,14 @@ const BlogListing = () => {
                   </p>
 
                   <div className="flex flex-wrap gap-2">
-                    {blog.tags?.map((tag) => (
-                      <span 
-                        key={tag} 
-                        className="bg-[#001845] text-[#00B4D8] px-3 py-1 rounded-full text-sm"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+                  {blog.tags?.map((tag) => (
+                    <span 
+                      key={tag} 
+                      className="bg-[#001845] text-[#00B4D8] px-3 py-1 rounded-full text-sm"
+                    >
+                      {tag.charAt(0).toUpperCase() + tag.slice(1)}
+                    </span>
+                  ))}
                   </div>
                 </motion.div>
               ))
@@ -301,6 +304,38 @@ const BlogListing = () => {
             )}
           </div>
         )}
+      </div>
+      {/* Floating Action Button with Tooltip */}
+      <div className="fixed bottom-8 right-16">
+        <div className='flex flex-col items-center gap-0'>
+
+        <AnimatePresence>
+          {showTooltip && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="absolute bottom-20 -translate-x-1/2 bg-[#002855] text-white px-3 py-1.5 rounded-lg text-sm whitespace-nowrap shadow-lg"
+            >
+              Create Blog
+              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#002855] rotate-45" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        <motion.button
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+          onClick={() => navigate('/createBlog')}
+          className="w-14 h-14 bg-[#00B4D8] hover:bg-[#0096c7] rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+          <Plus className="w-6 h-6 text-white" />
+        </motion.button>
+          </div>
       </div>
     </div>
   );

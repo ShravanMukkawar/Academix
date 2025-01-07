@@ -16,7 +16,7 @@ const Navbar = () => {
 
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [user]);
 
     const checkAuth = async () => {
         const token = localStorage.getItem('token');
@@ -69,7 +69,7 @@ const Navbar = () => {
             dispatch(logout());
             localStorage.removeItem('token');
             setIsAuthenticated(false);
-            navigate('/signin');
+            // navigate('/signin');
         }
     };
 
@@ -156,7 +156,7 @@ const Navbar = () => {
                     {/* Desktop Links */}
                     <div className="hidden sm:flex sm:items-center sm:space-x-4">
                         {/* Navigation Links */}
-                        {['/', '/getr', '/calendar', '/sfeedback'].map((path, index) => (
+                        {['/', '/getr','/blogs', '/calendar', '/sfeedback'].map((path, index) => (
                             <motion.div
                                 key={path}
                                 variants={linkVariants}
@@ -170,6 +170,7 @@ const Navbar = () => {
                                 >
                                     {path === '/' ? 'Home' : 
                                      path === '/getr' ? 'Resources' :
+                                     path === '/blogs' ? 'Blog' :
                                      path === '/calendar' ? 'Calendar' : 'Feedback'}
                                 </Link>
                             </motion.div>
@@ -243,6 +244,7 @@ const Navbar = () => {
                             {[
                                 { path: '/', label: 'Home' },
                                 { path: '/getr', label: 'Resources' },
+                                { path: '/blogs', label: 'Blog' },
                                 { path: '/calendar', label: 'Calendar' },
                                 { path: '/sfeedback', label: 'Feedback' }
                             ].map((item) => (

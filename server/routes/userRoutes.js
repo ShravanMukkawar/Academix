@@ -14,7 +14,7 @@ router.patch('/resetPassword/:token', authController.resetPassword);
 
 router.use(authController.protect);
 router.patch('/updateMe', userController.updateUser);
-router.get('/me', authController.getNameByMIS);
+router.get('/me', authController.getUserData);
 
 
 module.exports = router;

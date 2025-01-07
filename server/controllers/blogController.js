@@ -5,10 +5,11 @@ const APIFeatures = require('../utils/apiFeatures');
 
 // Create a new blog
 exports.createBlog = catchAsync(async (req, res, next) => {
+    const tags = req.body.tags.map(tag => tag.toLowerCase());
     const blog = await Blog.create({
         title: req.body.title,
         content: req.body.content,
-        tags: req.body.tags,
+        tags: tags,
         author: req.user.id, // Assuming `req.user` is populated by auth middleware
     });
 
@@ -25,8 +26,9 @@ exports.getAllBlogs = catchAsync(async (req, res, next) => {
     let query = Blog.find();
 
     // Handle tag filtering
+
     if (req.query.tags) {
-        const tags = req.query.tags.split(',').map(tag => tag.trim());
+        const tags = req.query.tags.split(',').map(tag => tag.trim().toLowerCase());
         query = query.find({ tags: { $in: tags } });
     }
 

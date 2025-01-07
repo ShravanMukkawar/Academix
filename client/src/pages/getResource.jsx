@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { parseMIS } from "../utils/MISParse";
 
 const BRANCH_CODES = {
   "03": "Computer Engineering",
@@ -14,18 +16,6 @@ const calculateSemester = (admissionYear) => {
   return [2, 4, 6].includes(semester) ? semester.toString() : "2";
 };
 
-const processMIS = (mis) => {
-  if (!mis || mis.length !== 9) return null;
-  
-  const misString = mis.toString();
-  const year = parseInt(misString.substring(2, 4));
-  const branchCode = misString.substring(4, 6);
-  
-  return {
-    branch: BRANCH_CODES[branchCode] || "",
-    semester: calculateSemester(year)
-  };
-};
 
 const extractPlaylistId = (url) => {
   const regex = /list=([a-zA-Z0-9_-]+)/;
@@ -151,15 +141,14 @@ const FetchResourcesPage = () => {
       setLoading(false);
     }
   };
+  const user = useSelector((state) => state.user.user);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
+    setIsLoggedIn(!!user);
     
-    if (token) {
+    if (user) {
       try {
-        const decodedToken = JSON.parse(atob(token.split(".")[1]));
-        const misInfo = processMIS(decodedToken.mis);
+        const misInfo = parseMIS(user.mis).data;
         if (misInfo?.branch && misInfo?.semester) {
           setFormData({
             branch: misInfo.branch,

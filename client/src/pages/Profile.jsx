@@ -5,6 +5,7 @@ import { Pen } from "lucide-react";
 import ImageUploader from "../components/ImageUploader";
 import { useDispatch } from 'react-redux';
 import { updateProfilePic } from "../redux/userSlice";
+import { parseMIS }  from "../utils/MISParse";
 
 const ProfileSection = ({ title, value, icon }) => (
   <motion.div
@@ -122,7 +123,9 @@ const ProfessionalProfile = () => {
         });
         
         const { user } = response.data.data;
-        const misInfo = processMIS(user.mis);
+        // console.log("misInfo","misInfo")
+        const misInfo = parseMIS(user.mis).data;
+        // console.log("misInfo",misInfo)
         
         setUserData({
           name: user.name,
@@ -140,23 +143,7 @@ const ProfessionalProfile = () => {
     fetchUserData();
   }, []);
 
-  const processMIS = (mis) => {
-    const BRANCH_CODES = { "03": "Computer Engineering" };
-    const calculateSemester = (admissionYear) => {
-      const currentYear = new Date().getFullYear() % 100;
-      const yearDiff = currentYear - admissionYear;
-      const semester = yearDiff * 2;
-      return [2, 4, 6, 8].includes(semester) ? semester.toString() : "2";
-    };
 
-    if (!mis || mis.length !== 9) return { branch: "", semester: "" };
-    const year = parseInt(mis.substring(2, 4), 10);
-    const branchCode = mis.substring(4, 6);
-    return {
-      branch: BRANCH_CODES[branchCode] || "Unknown Branch",
-      semester: calculateSemester(year),
-    };
-  };
 
   return (
     <div className="min-h-screen bg-slate-900 py-6 px-4 sm:py-12 sm:px-6 lg:px-8">

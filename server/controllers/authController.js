@@ -260,7 +260,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     }
 });
 
-exports.getNameByMIS = async (req, res) => {
+exports.getUserData = async (req, res) => {
     if (!req.user) {
         return next(new AppError('Token is invalid or has expired', 400));
     }

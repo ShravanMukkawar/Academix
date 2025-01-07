@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
 import { Send, User, BookOpen, MessageSquare, CheckCircle, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSelector, useDispatch } from 'react-redux';
+import { parseMIS } from '../utils/MISParse';
+
 
 const FeedbackForm = () => {
+  const user = useSelector((state) => state.user.user);
+  console.log(user);
+  const misInfo=parseMIS(user.mis).data;
   const [feedback, setFeedback] = useState({
-    name: '',
-    branch: '',
+    name: user?.name || "",
+    branch: misInfo.branch || "",
     suggestion: ''
   });
+
   
   const [status, setStatus] = useState({ type: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -125,9 +132,10 @@ const FeedbackForm = () => {
                   type="text"
                   id="name"
                   name="name"
-                  value={feedback.name}
+                  value={user?user.name:feedback.name}
                   onChange={handleFeedbackChange}
                   className="w-full px-4 py-3 rounded-xl bg-[#001845] border border-[#003875] text-white placeholder-gray-400 focus:border-[#00B4D8] focus:ring-2 focus:ring-[#00B4D8] outline-none transition-all duration-200"
+                  disabled={!!user} 
                   required
                 />
               </motion.div>
@@ -145,10 +153,11 @@ const FeedbackForm = () => {
                   type="text"
                   id="branch"
                   name="branch"
-                  value={feedback.branch}
+                  value={user?misInfo.branch:feedback.branch}
                   onChange={handleFeedbackChange}
                   className="w-full px-4 py-3 rounded-xl bg-[#001845] border border-[#003875] text-white placeholder-gray-400 focus:border-[#00B4D8] focus:ring-2 focus:ring-[#00B4D8] outline-none transition-all duration-200"
                   required
+                  disabled={!!user} 
                 />
               </motion.div>
 
