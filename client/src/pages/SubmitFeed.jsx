@@ -1,23 +1,84 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Send, User, BookOpen, MessageSquare, CheckCircle, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { parseMIS } from '../utils/MISParse';
 
-
 const FeedbackForm = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const user = useSelector((state) => state.user.user);
-  console.log(user);
-  const misInfo=parseMIS(user.mis).data;
+  const [misInfo, setMisInfo] = useState({ branch: '' });
+  
   const [feedback, setFeedback] = useState({
-    name: user?.name || "",
-    branch: misInfo.branch || "",
+    name: '',
+    branch: '',
     suggestion: ''
   });
-
   
   const [status, setStatus] = useState({ type: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(!!user);
+    if (user?.mis) {
+      const parsedMIS = parseMIS(user.mis).data;
+      setMisInfo(parsedMIS);
+      setFeedback(prev => ({
+        ...prev,
+        name: user.name || '',
+        branch: parsedMIS.branch || ''
+      }));
+    }
+  }, [user]);
+
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gradient-to-b from-[#001233] to-[#001845]">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-2xl bg-red-500/10 border border-red-500/20 rounded-2xl p-12 text-center backdrop-blur-sm"
+        >
+          <motion.h1 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-4xl font-bold text-red-400 mb-6"
+          >
+            Login Required
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-xl text-gray-300 mb-8"
+          >
+            Please login or sign up to access study resources
+          </motion.p>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="flex justify-center space-x-6"
+          >
+            <a 
+              href="/signin" 
+              className="px-8 py-3 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-300 shadow-lg hover:shadow-xl"
+            >
+              Login
+            </a>
+            <a 
+              href="/signup" 
+              className="px-8 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition-colors duration-300 shadow-lg hover:shadow-xl"
+            >
+              Sign Up
+            </a>
+          </motion.div>
+        </motion.div>
+      </div>
+    );
+  }
 
   const handleFeedbackChange = (e) => {
     const { name, value } = e.target;
@@ -50,11 +111,10 @@ const FeedbackForm = () => {
         message: 'Thank you for your valuable feedback!'
       });
       
-      setFeedback({
-        name: '',
-        branch: '',
+      setFeedback(prev => ({
+        ...prev,
         suggestion: ''
-      });
+      }));
       
     } catch (err) {
       setStatus({
@@ -90,7 +150,7 @@ const FeedbackForm = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-5rem)]  bg-[#001233] px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+    <div className="min-h-[calc(100vh-5rem)] bg-[#001233] px-4 sm:px-6 lg:px-8 flex items-center justify-center">
       <motion.div 
         className="w-full max-w-md"
         initial="hidden"
@@ -132,10 +192,10 @@ const FeedbackForm = () => {
                   type="text"
                   id="name"
                   name="name"
-                  value={user?user.name:feedback.name}
+                  value={feedback.name}
                   onChange={handleFeedbackChange}
                   className="w-full px-4 py-3 rounded-xl bg-[#001845] border border-[#003875] text-white placeholder-gray-400 focus:border-[#00B4D8] focus:ring-2 focus:ring-[#00B4D8] outline-none transition-all duration-200"
-                  disabled={!!user} 
+                  disabled={!!user}
                   required
                 />
               </motion.div>
@@ -153,11 +213,11 @@ const FeedbackForm = () => {
                   type="text"
                   id="branch"
                   name="branch"
-                  value={user?misInfo.branch:feedback.branch}
+                  value={feedback.branch}
                   onChange={handleFeedbackChange}
                   className="w-full px-4 py-3 rounded-xl bg-[#001845] border border-[#003875] text-white placeholder-gray-400 focus:border-[#00B4D8] focus:ring-2 focus:ring-[#00B4D8] outline-none transition-all duration-200"
                   required
-                  disabled={!!user} 
+                  disabled={!!user}
                 />
               </motion.div>
 
@@ -230,4 +290,3 @@ const FeedbackForm = () => {
 };
 
 export default FeedbackForm;
-
