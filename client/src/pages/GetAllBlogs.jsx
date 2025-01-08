@@ -1,3 +1,342 @@
+// //search blog not working
+// //work on it
+// import React, { useState, useEffect } from 'react';
+// import { AnimatePresence, motion } from 'framer-motion';
+// import axios from 'axios';
+// import { Link, useNavigate } from 'react-router-dom';
+// import { ChevronLeft, ChevronRight, Clock, X, Search, SortAsc, Plus, BookOpen,User,Calendar} from 'lucide-react';
+// import toast from 'react-hot-toast';
+
+// const BlogListing = () => {
+//   const [blogs, setBlogs] = useState([]);
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const [totalPages, setTotalPages] = useState(1);
+//   const [loading, setLoading] = useState(true);
+//   const [isLoggedIn, setIsLoggedIn] = useState(false);
+//   const [showTooltip, setShowTooltip] = useState(false);
+//   const [filters, setFilters] = useState({
+//     search: '',
+//     tags: []
+//   });
+//   const [sort, setSort] = useState('-createdAt');
+//   const [tagInput, setTagInput] = useState('');
+//   const navigate=useNavigate();
+//   const fetchBlogs = async (page) => {
+//     try {
+//       const tagsQuery = filters.tags.length 
+//         ? `&tags=${filters.tags.map(tag => tag.toLowerCase()).join(',')}` 
+//         : '';
+//       const searchQuery = filters.search ? `&search=${filters.search}` : '';
+
+      
+//       const URL = `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/blogs?page=${page}&limit=10&sort=${sort}${tagsQuery}${searchQuery}`;
+      
+//       const token = localStorage.getItem('token');
+//       const response = await axios.get(URL, {
+//         withCredentials: true,
+//         headers: { Authorization: `Bearer ${token}` }
+//       });
+
+//       setBlogs(response.data.data.blogs);
+//       setTotalPages(Math.ceil(response.data.totalCount / 10));
+//       setLoading(false);
+//     } catch (error) {
+//       console.error("Error fetching blogs:", error);
+//       toast.error("Failed to fetch blogs");
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     const token = localStorage.getItem("token");
+//     setIsLoggedIn(!!token);
+//     fetchBlogs(currentPage);
+//   }, [currentPage, filters, sort]);
+
+//   const handleAddTag = (e) => {
+//     if (e.key === 'Enter' && tagInput.trim()) {
+//       setFilters(prev => ({
+//         ...prev,
+//         tags: [...new Set([...prev.tags, tagInput.trim()])]
+//       }));
+//       setTagInput('');
+//     }
+//   };
+
+//   const removeTag = (tagToRemove) => {
+//     setFilters(prev => ({
+//       ...prev,
+//       tags: prev.tags.filter(tag => tag !== tagToRemove)
+//     }));
+//   };
+
+//   const truncateContent = (content, maxLength = 150) => {
+//     if (content.length <= maxLength) return content;
+//     return content.substr(0, maxLength).trim() + '...';
+//   };
+
+//   const formatDate = (dateString) => {
+//     const date = new Date(dateString);
+//     const formattedDate = date.toLocaleDateString('en-US', {
+//       year: 'numeric',
+//       month: 'long',
+//       day: 'numeric',
+//     });
+//     const formattedTime = date.toLocaleTimeString('en-US', {
+//       hour: '2-digit',
+//       minute: '2-digit',
+//       hour12: true, // Use 12-hour format with AM/PM
+//     });
+//     return `${formattedDate} ${formattedTime}`;
+//   };
+  
+  
+//   if (!isLoggedIn) {
+//     return (
+//       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-6">
+//         <motion.div
+//           initial={{ opacity: 0, y: 20 }}
+//           animate={{ opacity: 1, y: 0 }}
+//           className="max-w-2xl w-full bg-slate-800/50 backdrop-blur-lg rounded-2xl p-12 border border-slate-700/50"
+//         >
+//           <motion.div
+//             initial={{ opacity: 0, y: -20 }}
+//             animate={{ opacity: 1, y: 0 }}
+//             transition={{ delay: 0.2 }}
+//             className="text-center"
+//           >
+//             <BookOpen className="w-16 h-16 mx-auto mb-6 text-blue-400" />
+//             <h1 className="text-4xl font-bold text-white mb-4">Welcome to Blogs</h1>
+//             <p className="text-slate-300 mb-8">Please sign in to access the full blog experience</p>
+//             <div className="flex justify-center gap-4">
+//               <Link
+//                 to="/signin"
+//                 className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl transition-all duration-200"
+//               >
+//                 Sign In
+//               </Link>
+//               <Link
+//                 to="/signup"
+//                 className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-all duration-200"
+//               >
+//                 Create Account
+//               </Link>
+//             </div>
+//           </motion.div>
+//         </motion.div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 px-4 sm:px-6 lg:px-8 py-12">
+//       <div className="max-w-6xl mx-auto">
+//         <motion.div 
+//           initial={{ opacity: 0, y: -20 }}
+//           animate={{ opacity: 1, y: 0 }}
+//           className="text-center mb-12"
+//         >
+//           <h1 className="text-4xl font-bold text-white mb-4">Explore Blog Posts</h1>
+//           <p className="text-slate-400">Discover stories, insights, and knowledge</p>
+//         </motion.div>
+
+//         {/* Search and Filters */}
+//         <div className="mb-8 space-y-4 bg-slate-800/50 backdrop-blur-lg rounded-2xl p-6 border border-slate-700/50">
+//           <div className="flex flex-col lg:flex-row gap-4">
+//             <div className="relative flex-1">
+//               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+//               <input
+//                 type="text"
+//                 placeholder="Search posts..."
+//                 value={filters.search}
+//                 onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+//                 className="w-full pl-12 pr-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl 
+//                          text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+//               />
+//             </div>
+            
+//             <div className="relative w-full lg:w-48">
+//               <SortAsc className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+//               <select
+//                 value={sort}
+//                 onChange={(e) => setSort(e.target.value)}
+//                 className="w-full pl-12 pr-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl
+//                          text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all appearance-none"
+//               >
+//                 <option value="-createdAt">Latest First</option>
+//                 <option value="createdAt">Oldest First</option>
+//                 <option value="title">Title A-Z</option>
+//                 <option value="-title">Title Z-A</option>
+//               </select>
+//             </div>
+//           </div>
+
+//           <div className="flex flex-wrap gap-2">
+//             <input
+//               type="text"
+//               placeholder="Add tags (press Enter)"
+//               value={tagInput}
+//               onChange={(e) => setTagInput(e.target.value)}
+//               onKeyDown={handleAddTag}
+//               className="flex-1 px-4 py-2 bg-slate-900/50 border border-slate-700 rounded-xl
+//                        text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+//             />
+//             {filters.tags.map(tag => (
+//               <motion.span
+//                 key={tag}
+//                 initial={{ scale: 0 }}
+//                 animate={{ scale: 1 }}
+//                 exit={{ scale: 0 }}
+//                 className="inline-flex items-center px-3 py-1 rounded-full text-sm
+//                          bg-blue-500/20 text-blue-300 border border-blue-500/20"
+//               >
+//                 {tag}
+//                 <button
+//                   onClick={() => removeTag(tag)}
+//                   className="ml-2 hover:text-white transition-colors"
+//                 >
+//                   <X className="w-4 h-4" />
+//                 </button>
+//               </motion.span>
+//             ))}
+//           </div>
+//         </div>
+
+//         {/* Blog Posts */}
+//         {loading ? (
+//           <div className="flex justify-center py-20">
+//             <motion.div
+//               className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full"
+//               animate={{ rotate: 360 }}
+//               transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+//             />
+//           </div>
+//         ) : (
+//           <div className="space-y-6">
+//             <AnimatePresence>
+//               {blogs.length === 0 ? (
+//                 <motion.div
+//                   initial={{ opacity: 0 }}
+//                   animate={{ opacity: 1 }}
+//                   exit={{ opacity: 0 }}
+//                   className="text-center py-20"
+//                 >
+//                   <div className="text-slate-400 text-lg">No posts found matching your criteria</div>
+//                 </motion.div>
+//               ) : (
+//                 blogs.map((blog, index) => (
+//                   <motion.article
+//                     key={blog._id}
+//                     initial={{ opacity: 0, y: 20 }}
+//                     animate={{ opacity: 1, y: 0 }}
+//                     transition={{ delay: index * 0.1 }}
+//                     className="group bg-slate-800/50 backdrop-blur-lg rounded-2xl p-6 border border-slate-700/50
+//                              hover:border-blue-500/50 transition-all duration-300"
+//                   >
+//                     <Link to={`/blogs/${blog._id}`}>
+//                       <h2 className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">
+//                         {blog.title}
+//                       </h2>
+//                     </Link>
+
+//                     <div className="flex flex-wrap gap-4 mt-4 text-sm text-slate-400">
+//                       <div className="flex items-center">
+//                         <User className="w-4 h-4 mr-2" />
+//                         {blog.author?.name || 'Anonymous'}
+//                       </div>
+//                       <div className="flex items-center">
+//                         <Calendar className="w-4 h-4 mr-2" />
+//                         {formatDate(blog.createdAt)}
+//                       </div>
+//                     </div>
+
+//                     <p className="mt-4 text-slate-300 line-clamp-3">
+//                       {truncateContent(blog.content)}
+//                     </p>
+
+//                     <div className="flex flex-wrap gap-2 mt-4">
+//                       {blog.tags?.map(tag => (
+//                         <span
+//                           key={tag}
+//                           className="px-3 py-1 rounded-full text-sm bg-slate-900/50 text-blue-300
+//                                    border border-slate-700/50"
+//                         >
+//                           #{tag}
+//                         </span>
+//                       ))}
+//                     </div>
+//                   </motion.article>
+//                 ))
+//               )}
+//             </AnimatePresence>
+
+//             {/* Pagination */}
+//             {blogs.length > 0 && (
+//               <div className="flex justify-center items-center gap-4 mt-12">
+//                 <button
+//                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+//                   disabled={currentPage === 1}
+//                   className="p-2 rounded-xl bg-slate-800 text-white disabled:opacity-50 
+//                            hover:bg-slate-700 transition-colors"
+//                 >
+//                   <ChevronLeft className="w-5 h-5" />
+//                 </button>
+//                 <span className="text-slate-400">
+//                   Page {currentPage} of {totalPages}
+//                 </span>
+//                 <button
+//                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+//                   disabled={currentPage === totalPages}
+//                   className="p-2 rounded-xl bg-slate-800 text-white disabled:opacity-50 
+//                            hover:bg-slate-700 transition-colors"
+//                 >
+//                   <ChevronRight className="w-5 h-5" />
+//                 </button>
+//               </div>
+//             )}
+//           </div>
+//         )}
+//       </div>
+
+//       {/* Create Post FAB */}
+//       <div className="fixed bottom-8 right-8">
+//         <AnimatePresence>
+//           {showTooltip && (
+//             <motion.div
+//               initial={{ opacity: 0, y: 10 }}
+//               animate={{ opacity: 1, y: 0 }}
+//               exit={{ opacity: 0, y: 10 }}
+//               className="absolute bottom-full mb-2 -left-1/2 px-4 py-2 bg-slate-800 
+//                        text-white rounded-lg text-sm whitespace-nowrap"
+//             >
+//               Create New Post
+//               <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 
+//                           w-2 h-2 bg-slate-800 rotate-45" />
+//             </motion.div>
+//           )}
+//         </AnimatePresence>
+
+//         <motion.button
+//           initial={{ scale: 0 }}
+//           animate={{ scale: 1 }}
+//           whileHover={{ scale: 1.1 }}
+//           whileTap={{ scale: 0.9 }}
+//           onMouseEnter={() => setShowTooltip(true)}
+//           onMouseLeave={() => setShowTooltip(false)}
+//           onClick={() => navigate('/createBlog')}
+//           className="w-14 h-14 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center 
+//                    justify-center shadow-lg hover:shadow-xl transition-all duration-300"
+//         >
+//           <Plus className="w-6 h-6 text-white" />
+//         </motion.button>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default BlogListing;
+
+
 //search blog not working
 //work on it
 import React, { useState, useEffect } from 'react';
