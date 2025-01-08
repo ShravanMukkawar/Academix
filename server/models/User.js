@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
     },
     mis: {
         type: String,
-        unique: true,
+        unique: false,
         required: [true, 'Please tell us your mis!']
     },
     email: {

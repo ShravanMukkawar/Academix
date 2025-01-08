@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import ImageUploader from '../components/ImageUploader';
@@ -9,15 +9,63 @@ import ImageUploader from '../components/ImageUploader';
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState({
+    email: '',
+    mis: '',
+    password: ''
+  });
   const [data, setData] = useState({
-    email: "", name: "", password: "", passwordConfirm: "", mis: "", profilePic: ""
+    email: "",
+    name: "",
+    password: "",
+    passwordConfirm: "",
+    mis: "",
+    profilePic: ""
   });
 
   const navigate = useNavigate();
 
+  const validateField = (name, value) => {
+    switch (name) {
+      case 'email':
+        if (value && !value.endsWith('@coeptech.ac.in')) {
+          return 'Email must be from COEP Tech domain (@coeptech.ac.in)';
+        }
+        break;
+      case 'mis':
+        if (value && value.length !== 9) {
+          return 'MIS must be exactly 9 characters long';
+        }
+        break;
+      case 'password':
+        if (value && value.length < 8) {
+          return 'Password must be at least 8 characters long';
+        }
+        break;
+      case 'passwordConfirm':
+        if (value && value !== data.password) {
+          return 'Passwords do not match';
+        }
+        break;
+      default:
+        return '';
+    }
+    return '';
+  };
+
   const handleOnChange = (e) => {
     const { name, value } = e.target;
     setData(prev => ({ ...prev, [name]: value }));
+    
+    // Validate the changed field
+    const error = validateField(name, value);
+    setErrors(prev => ({ ...prev, [name]: error }));
+
+    // Special case for password confirmation
+    if (name === 'password' && data.passwordConfirm) {
+      const confirmError = validateField('passwordConfirm', data.passwordConfirm);
+      setErrors(prev => ({ ...prev, passwordConfirm: confirmError }));
+    }
   };
 
   const handleUploadSuccess = (url) => {
@@ -26,16 +74,26 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate all fields before submission
+    const formErrors = {
+      email: validateField('email', data.email),
+      mis: validateField('mis', data.mis),
+      password: validateField('password', data.password),
+      passwordConfirm: validateField('passwordConfirm', data.passwordConfirm)
+    };
+
+    setErrors(formErrors);
+
+    // Check if there are any errors
+    if (Object.values(formErrors).some(error => error !== '')) {
+      toast.error('Please fix all errors before submitting');
+      return;
+    }
+
     const URL = `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/users/register`;
     try {
-      const response = await axios.post(URL, {
-        email: data.email,
-        name: data.name,
-        password: data.password,
-        passwordConfirm: data.passwordConfirm,
-        mis: data.mis,
-        profilePic: data.profilePic
-      }, { withCredentials: true });
+      const response = await axios.post(URL, data, { withCredentials: true });
       
       if (response.data.status === "success") {
         toast.success("Registration successful");
@@ -44,16 +102,29 @@ const SignUp = () => {
           setData({ email: "", password: "", passwordConfirm: "", mis: "", name: "", profilePic: "" });
           navigate('/verify-otp');
         }, 1000);
-      } else {
-        toast.error("Registration failed. Please try again.");
       }
     } catch (error) {
-      toast.error("An error occurred during registration.");
-      console.log(">>", error);
+      if (error.response?.status === 401) {
+        toast.error("Duplicate Email Found");
+      } else {
+        toast.error("Error occurred during registration");
+      }
     }
   };
+
   const inputClass = "mt-1 rounded-lg p-2.5 w-full text-base bg-[#001233] border border-[#0094c6]/30 focus:outline-none focus:ring-2 focus:ring-[#0094c6] transition text-white";
   const labelClass = "text-sm font-medium text-[#0094c6]";
+
+  const fields = [
+    { label: "Name", name: "name", type: "text" },
+    { label: "Email", name: "email", type: "email" },
+    { label: "MIS", name: "mis", type: "text" }
+  ];
+
+  const passwordFields = [
+    { label: "Password", name: "password", show: showPassword, setShow: setShowPassword },
+    { label: "Confirm Password", name: "passwordConfirm", show: showConfirmPassword, setShow: setShowConfirmPassword }
+  ];
 
   return (
     <div className='min-h-screen flex justify-center items-center p-4 bg-[#000B1D]'>
@@ -75,11 +146,7 @@ const SignUp = () => {
           Register
         </motion.h1>
 
-        {[
-          { label: "Name", name: "name", type: "text" },
-          { label: "Email", name: "email", type: "email" },
-          { label: "MIS", name: "mis", type: "text" }
-        ].map((field, index) => (
+        {fields.map((field, index) => (
           <motion.div
             key={field.name}
             initial={{ opacity: 0, y: 20 }}
@@ -92,18 +159,18 @@ const SignUp = () => {
               type={field.type}
               id={field.name}
               name={field.name}
-              className={inputClass}
+              className={`${inputClass} ${errors[field.name] ? 'border-red-500' : ''}`}
               required
               value={data[field.name]}
               onChange={handleOnChange}
             />
+            {errors[field.name] && (
+              <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>
+            )}
           </motion.div>
         ))}
 
-        {[
-          { label: "Password", name: "password", show: showPassword, setShow: setShowPassword },
-          { label: "Confirm Password", name: "passwordConfirm", show: showConfirmPassword, setShow: setShowConfirmPassword }
-        ].map((field, index) => (
+        {passwordFields.map((field, index) => (
           <motion.div
             key={field.name}
             initial={{ opacity: 0, y: 20 }}
@@ -126,11 +193,14 @@ const SignUp = () => {
               type={field.show ? 'text' : 'password'}
               id={field.name}
               name={field.name}
-              className={inputClass}
+              className={`${inputClass} ${errors[field.name] ? 'border-red-500' : ''}`}
               required
               value={data[field.name]}
               onChange={handleOnChange}
             />
+            {errors[field.name] && (
+              <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>
+            )}
           </motion.div>
         ))}
 

@@ -1,84 +1,124 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import toast  from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { loginSuccess } from '../redux/userSlice';
 import { useDispatch } from 'react-redux';
+import { motion } from 'framer-motion';
+import { HiOutlineMail } from 'react-icons/hi';
 
 const VerifyOtp = () => {
-    const [data, setData] = useState({
-        otp:""
-    });    
-    const token=localStorage.getItem('token')
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const handleOnChange = (e) => {
+  const [data, setData] = useState({
+    otp: ""
+  });
+  
+  const token = localStorage.getItem('token');
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const handleOnChange = (e) => {
     const { name, value } = e.target;
-    setData((prev) => ({
+    // Only allow numbers and limit to 6 characters
+    if (value.length <= 6 && /^\d*$/.test(value)) {
+      setData(prev => ({
         ...prev,
         [name]: value
-    }));
-    };
+      }));
+    }
+  };
 
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
+    if (data.otp.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP");
+      return;
+    }
+
     const URL = `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/users/verifySignupEmailOTP`;
     try {
-        const response = await axios.post(URL, {
+      const response = await axios.post(URL, {
         Emailotp: data.otp
-        },{ headers: { 'authorization': `Bearer ${token}` }},{
+      }, {
+        headers: { 'authorization': `Bearer ${token}` },
         withCredentials: true
-        });
-        
-        if (response.data.status === "success") {
-            const userData = response.data.data.oldUser;
-            dispatch(loginSuccess(userData)); // Dispatch the user state to Redux
-        setTimeout(() => {
-            toast.success("verification successful");
-                setData({
-                    otp:""
-            });
-            navigate('/'); // Redirect to the login page
-        }, 1000);
-        } else {
-        toast.error("Registration failed. Please try again.");
-        }
+      });
+
+      if (response.data.status === "success") {
+        const userData = response.data.data.oldUser;
+        dispatch(loginSuccess(userData));
+        toast.success("Email verification successful!");
+        setData({ otp: "" });
+        navigate('/');
+      }
     } catch (error) {
-        toast.error("An error occurred during registration.");
-        console.log(">>", error);
-        navigate('/register')
+      toast.error(error.response?.data?.message || "Verification failed. Please try again.");
+      console.error("Verification error:", error);
+      navigate('/register');
     }
-    };
+  };
 
-    return (
-    <>
-        <div className='flex justify-center items-center h-screen w-screen bg-black'>
-        <form onSubmit={handleSubmit} className='relative w-1/4 max-w-md dark:text-white dark:bg-blue-950 h-auto rounded-2xl bg-slate-200 bg-opacity-90 flex flex-col p-6 shadow-lg'>
-            <h1 className='font-sans text-2xl font-bold mb-6 text-center'>verify otp</h1>
-            <label className="text-xs text-slate-500 dark:text-white" htmlFor="otp">OTP</label>
-            <input
-            type="text"
-            id="otp"
-            name="otp"
-            className=" bg-slate-200 mt-1 rounded p-2 w-full text-sm text-black"
-            required
-            value={data.otp}
-            onChange={handleOnChange}
-            />
-            <button type="submit"
-            className="bg-slate-500 mt-3 rounded-3xl p-2 text-white font-semibold hover:bg-slate-800"
+  return (
+    <div className='min-h-screen flex justify-center items-center p-4 bg-[#000B1D]'>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className='w-full max-w-md'
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+          className='bg-[#001233] rounded-xl p-8 shadow-xl border border-[#0094c6]/20'
+        >
+          <div className='flex flex-col items-center mb-6'>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className='w-16 h-16 bg-[#0094c6]/10 rounded-full flex items-center justify-center mb-4'
             >
-            Verify
-            </button>
- 
-        </form>
-        </div>
-    </>
-    );
-};
-    
-    
+              <HiOutlineMail className='w-8 h-8 text-[#0094c6]' />
+            </motion.div>
+            <h1 className='text-2xl font-bold text-[#0094c6] text-center'>Email Verification</h1>
+            <p className='mt-2 text-center text-gray-400 text-sm'>
+              We've sent a verification code to your email address. Please check your inbox and enter the code below.
+            </p>
+          </div>
 
-export default VerifyOtp
+          <form onSubmit={handleSubmit} className='space-y-6'>
+            <div>
+              <label className="block text-sm font-medium text-[#0094c6] mb-2" htmlFor="otp">
+                Verification Code
+              </label>
+              <input
+                type="text"
+                id="otp"
+                name="otp"
+                placeholder="Enter 6-digit code"
+                className="w-full px-4 py-3 bg-[#001233] border border-[#0094c6]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0094c6] text-white text-center text-lg tracking-widest"
+                required
+                value={data.otp}
+                onChange={handleOnChange}
+                maxLength={6}
+              />
+            </div>
+
+            <motion.button
+              type="submit"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-[#0094c6] text-white rounded-lg py-3 font-medium transition duration-200 hover:bg-[#0094c6]/90 focus:outline-none focus:ring-2 focus:ring-[#0094c6] focus:ring-offset-2 focus:ring-offset-[#001233]"
+            >
+              Verify Email
+            </motion.button>
+          </form>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default VerifyOtp;
