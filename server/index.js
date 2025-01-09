@@ -27,7 +27,11 @@ if (process.env.NODE_ENV === "development") {
 }
 app.use(
   cors({
+<<<<<<< HEAD
     origin: process.env.FRONTEND_URL, // Replace with your frontend's origin
+=======
+    origin:process.env.FRONTEND_URL, // Replace with your frontend's origin
+>>>>>>> 94abf91a90d5caafbb70bbba8b86f47c70e6445e
     credentials: true, // Allow credentials (cookies, authorization headers)
   })
 );
