@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.5.0",
+    "@tinymce/tinymce-react": "^5.1.1",
     "@vercel/analytics": "^1.4.1",
     "axios": "^1.7.9",
+    "dompurify": "^3.2.3",
     "framer-motion": "^11.15.0",
     "jwt-decode": "^4.0.0",
     "lru-cache": "^11.0.2",

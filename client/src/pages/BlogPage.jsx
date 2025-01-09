@@ -4,6 +4,7 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Heart, Clock, Send, ChevronDown, ChevronUp, Reply, Trash, Edit, Check, X, SortAsc, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
+import HTMLContent from '../components/HTMLContent';
 
 const Comment = ({ comment, onReply, onDelete, onLike, onUpdate, allComments, depth = 0 }) => {
   const [showReplies, setShowReplies] = useState(false);
@@ -388,7 +389,7 @@ const SingleBlog = () => {
           </div>
 
           <div className="prose prose-invert max-w-none mb-6">
-            {blog?.content}
+            <HTMLContent content={blog?.content} />
           </div>
 
           <div className="flex items-center justify-between border-t border-[#003875] pt-4">

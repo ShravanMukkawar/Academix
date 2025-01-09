@@ -40,6 +40,19 @@ h1 {
   line-height: 1.1;
 }
 
+
+h2 {
+  font-size: 1.5em; /* Slightly smaller than h1 */
+}
+
+h3 {
+  font-size: 1.255em; /* Smaller than h2 for clear distinction */
+}
+h4 {
+  font-size: 1em; /* Smaller than h2 for clear distinction */
+}
+
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
