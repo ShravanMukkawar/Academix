@@ -57,8 +57,6 @@ coverage/
 
 # Gatsby files
 .cache/
-public/
-
 # Tailwind CSS JIT
 .tailwind/
 
