@@ -18,6 +18,7 @@ const blogSchema = new mongoose.Schema(
         },
         tags: {
             type: [String],
+            index: true,
         },
         likes: [{
             type: mongoose.Schema.Types.ObjectId,

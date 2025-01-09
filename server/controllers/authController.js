@@ -50,10 +50,15 @@ exports.signup = catchAsync(async (req, res, next) => {
         return next(new AppError('Passwords do not match!', 400));
     }
     const user = await User.findOne({ email: email }); // Use await to resolve the promise
+    const user1 = await User.findOne({ mis: mis }); // Use await to resolve the promise
 
     if (user) { // Check if user exists
         console.log(user.email);
         return next(new AppError('Duplicate Email Found.', 401));
+    }
+    if (user1) { // Check if user exists
+        console.log(user1.mis);
+        return next(new AppError('Duplicate MIS Found.', 401));
     }
 
     // If no user found, continue with your next logic
@@ -71,7 +76,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     const EmailotpExpires = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
     const randomString = generateRandomString(6);
     const modifiedEmail = "notverified" + randomString + email;
-    // const modifiedMIS = "notverified" + randomString + mis;
+    const modifiedMIS = "notverified" + randomString + mis;
     // Create new user with hashed OTP and its expiration
     const newUser = await User.create({
         name,
@@ -80,7 +85,7 @@ exports.signup = catchAsync(async (req, res, next) => {
         password,
         passwordConfirm,
         role: "User",
-        mis,
+        mis: modifiedMIS,
         Emailotp: hashedOtp,
         EmailotpExpires
     });
@@ -137,10 +142,17 @@ exports.verifyOtp = catchAsync(async (req, res, next) => {
         .digest('hex');
     const realEmail = decoded.email;
     const realEmail1 = realEmail.slice(17); // Adjust based on your slicing logic
-    const user = await User.findOne({ email: realEmail1 }); // Use await to resolve the promise
+    const realMIS = decoded.mis;
+    const realMIS1 = realMIS.slice(17); // Adjust based on your slicing logic
+    const user = await User.findOne({
+        $or: [{ email: realEmail1 }, { mis: realMIS1 }]
+    });
+    // Use await to resolve the promise
+    console.log(realEmail1);
+    console.log(realMIS1);
     // console.log(user);
-    // const realMIS = user.mis;
-    // const realMIS1 = realMIS.slice(17); // Adjust based on your slicing logic
+    // console.log(user.mis);
+    // console.log(realMIS1);
 
     console.log(decoded.email);
     if (user) { // Check if user exists
@@ -168,10 +180,13 @@ exports.verifyOtp = catchAsync(async (req, res, next) => {
         );
     }
     await User.findByIdAndUpdate(
-        oldUser._id,            // Find the user by their ID
-        { email: realEmail1 }   // Update the email field with `realEmail1`
+        oldUser._id, // Find the user by their ID
+        { email: realEmail1, mis: realMIS1 }, // Update the email and mis fields
+        { new: true, runValidators: true } // Options: return updated document & validate updates
     );
+
     oldUser.email = realEmail1;
+    oldUser.email = realMIS1;
     res.status(200).clearCookie('token').json({
         status: 'success', token,
         data: {
@@ -238,11 +253,11 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`
     console.log(resetURL);
     try {
-        // await sendEmail({
-        //     email: user.email,
-        //     subject: 'Your password reset token (valid for 10 min)',
-        //     html: passwordResetEmail(user, resetURL)
-        // });
+        await sendEmail({
+            email: user.email,
+            subject: 'Your password reset token (valid for 10 min)',
+            html: passwordResetEmail(user, resetURL)
+        });
         console.log("😒😒😒😒", resetToken);
         res.status(200).json({
             status: 'success',

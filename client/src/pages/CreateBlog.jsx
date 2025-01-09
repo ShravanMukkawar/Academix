@@ -14,20 +14,28 @@ const CreateBlog = () => {
   const [currentTag, setCurrentTag] = useState('');
   const [status, setStatus] = useState({ type: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value
     }));
   };
-  const navigate=useNavigate()
+
+  // Add tag when Enter key is pressed
+  const handleTagKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent form submission on Enter
+      handleAddTag(e);
+    }
+  };
 
   const handleAddTag = (e) => {
     e.preventDefault();
     if (currentTag.trim() && !formData.tags.includes(currentTag.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         tags: [...prev.tags, currentTag.trim()]
       }));
@@ -36,15 +44,18 @@ const CreateBlog = () => {
   };
 
   const removeTag = (tag) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tags: prev.tags.filter(t => t !== tag)
+      tags: prev.tags.filter((t) => t !== tag)
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    e.stopPropagation();
+    e.stopPropagation(); // Prevent form submission on Enter
+
+    if (isSubmitting) return;
+
     setIsSubmitting(true);
 
     const URL = `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/blogs`;
@@ -57,8 +68,8 @@ const CreateBlog = () => {
         }
       });
 
-      if (response.data.status === "success") {
-        toast.success("Blog post created successfully!");
+      if (response.data.status === 'success') {
+        toast.success('Blog post created successfully!');
         setTimeout(() => {
           setFormData({
             title: '',
@@ -68,11 +79,11 @@ const CreateBlog = () => {
           navigate('/blogs');
         }, 1000);
       } else {
-        toast.error("Failed to create blog post");
+        toast.error('Failed to create blog post');
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error creating blog post");
-      console.error(">>", error);
+      toast.error(error.response?.data?.message || 'Error creating blog post');
+      console.error('>>', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -80,7 +91,7 @@ const CreateBlog = () => {
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-[#001233] px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-      <motion.div 
+      <motion.div
         className="w-full max-w-3xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -88,7 +99,7 @@ const CreateBlog = () => {
       >
         <div className="bg-[#002855] rounded-2xl shadow-2xl overflow-hidden border border-[#003875]">
           <div className="px-8 py-6 bg-gradient-to-r from-[#001845] to-[#002855]">
-            <motion.h2 
+            <motion.h2
               className="text-3xl font-bold text-[#00B4D8] text-center"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -100,10 +111,7 @@ const CreateBlog = () => {
 
           <div className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <motion.div 
-                className="space-y-2"
-                whileHover={{ scale: 1.01 }}
-              >
+              <motion.div className="space-y-2" whileHover={{ scale: 1.01 }}>
                 <label className="flex items-center text-sm font-medium text-gray-300">
                   <Pencil className="w-4 h-4 mr-2 text-[#00B4D8]" />
                   Title
@@ -117,10 +125,7 @@ const CreateBlog = () => {
                 />
               </motion.div>
 
-              <motion.div 
-                className="space-y-2"
-                whileHover={{ scale: 1.01 }}
-              >
+              <motion.div className="space-y-2" whileHover={{ scale: 1.01 }}>
                 <label className="flex items-center text-sm font-medium text-gray-300">
                   <Pencil className="w-4 h-4 mr-2 text-[#00B4D8]" />
                   Content
@@ -134,10 +139,7 @@ const CreateBlog = () => {
                 />
               </motion.div>
 
-              <motion.div 
-                className="space-y-2"
-                whileHover={{ scale: 1.01 }}
-              >
+              <motion.div className="space-y-2" whileHover={{ scale: 1.01 }}>
                 <label className="flex items-center text-sm font-medium text-gray-300">
                   <Tags className="w-4 h-4 mr-2 text-[#00B4D8]" />
                   Tags
@@ -146,6 +148,7 @@ const CreateBlog = () => {
                   <input
                     value={currentTag}
                     onChange={(e) => setCurrentTag(e.target.value)}
+                    onKeyDown={handleTagKeyPress} // Add keydown event for Enter
                     className="w-full px-4 py-3 rounded-xl bg-[#001845] border border-[#003875] text-white focus:border-[#00B4D8] focus:ring-2 focus:ring-[#00B4D8] outline-none"
                     placeholder="Add a tag"
                   />
@@ -158,7 +161,7 @@ const CreateBlog = () => {
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.tags.map(tag => (
+                  {formData.tags.map((tag) => (
                     <motion.span
                       key={tag}
                       className="bg-[#001845] px-3 py-1 rounded-full text-white flex items-center gap-2"
@@ -180,20 +183,21 @@ const CreateBlog = () => {
 
               <AnimatePresence>
                 {status.message && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     className={`flex items-center p-4 rounded-xl ${
-                      status.type === 'success' 
-                        ? 'bg-[#002855] text-[#00B4D8] border border-[#00B4D8]' 
+                      status.type === 'success'
+                        ? 'bg-[#002855] text-[#00B4D8] border border-[#00B4D8]'
                         : 'bg-[#002855] text-red-400 border border-red-400'
                     }`}
                   >
-                    {status.type === 'success' 
-                      ? <CheckCircle className="w-5 h-5 mr-2" />
-                      : <XCircle className="w-5 h-5 mr-2" />
-                    }
+                    {status.type === 'success' ? (
+                      <CheckCircle className="w-5 h-5 mr-2" />
+                    ) : (
+                      <XCircle className="w-5 h-5 mr-2" />
+                    )}
                     {status.message}
                   </motion.div>
                 )}
@@ -207,10 +211,10 @@ const CreateBlog = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 {isSubmitting ? (
-                  <motion.div 
+                  <motion.div
                     className="w-6 h-6 border-2 border-white border-t-transparent rounded-full"
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                   />
                 ) : (
                   <>
@@ -224,6 +228,8 @@ const CreateBlog = () => {
         </div>
       </motion.div>
     </div>
+ 
+
   );
 };
 

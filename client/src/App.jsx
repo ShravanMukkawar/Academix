@@ -11,7 +11,6 @@ import CalendarComponent from './pages/Calendar.jsx';
 import { Analytics } from "@vercel/analytics/react"
 import ProtectedRoute from "./utils/ProtectedRoute.jsx"; 
 import SignUp from './pages/SignUp.jsx';
-import Temp from './pages/temp.jsx';
 import VerifyOtp from './pages/VerifyOtp.jsx';
 import SignIn from './pages/SignIn.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
@@ -46,6 +45,15 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/seefeedback"
+              element={
+                <ProtectedRoute requiredPassword={requiredPassword}>
+                  <FeedbackPage />
+                </ProtectedRoute>
+              }
+            />
+              {/* <Route path="/seefeedback" element={<FeedbackPage />} /> */}
             {/* <Route path="/updater" element={<UpdateResourcesPage />} /> */}
             <Route path="/yt/:id" element={<YouTubePlaylist />} />
             <Route path="/signup" element={<SignUp />} />
@@ -55,7 +63,6 @@ const App = () => {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/" element={<Home />} />
             <Route path="/getr" element={<FetchResourcesPage />} />
-            <Route path="/seefeedback" element={<FeedbackPage />} />
             <Route path="/sfeedback" element={<FeedbackForm />} />
             <Route path="/calendar" element={<CalendarComponent />} />
             <Route path="/createBlog" element={<CreateBlog />} />

@@ -6,6 +6,7 @@ const Blog = require('../models/Blog');
 const router = express.Router({ mergeParams: true });
 
 router.use(authController.protect);
+router.get('/search', blogController.searchBlogs)
 
 router
     .route('/')
@@ -22,5 +23,6 @@ router
 router
     .route('/:id/like')
     .patch(likeUnlike(Blog))
+
 
 module.exports = router;

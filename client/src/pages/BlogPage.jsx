@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { Heart, Clock, Send, ChevronDown, ChevronUp, Reply, Trash, Edit, Check, X, SortAsc } from 'lucide-react';
+import { Heart, Clock, Send, ChevronDown, ChevronUp, Reply, Trash, Edit, Check, X, SortAsc, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Comment = ({ comment, onReply, onDelete, onLike, onUpdate, allComments, depth = 0 }) => {
@@ -182,6 +182,7 @@ const SingleBlog = () => {
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
+  const [viewsCount, setViewsCount] = useState(0);
   const [sort, setSort] = useState('-createdAt');
 
   useEffect(() => {
@@ -203,6 +204,7 @@ const SingleBlog = () => {
       const user = JSON.parse(localStorage.getItem('user'));
       setIsLiked(response.data.data.blog.likes.includes(user._id));
       setLikesCount(response.data.data.blog.likesCount);
+      setViewsCount(response.data.data.blog.viewsCount);
       setLoading(false);
     } catch (error) {
       toast.error("Failed to fetch blog");
@@ -390,24 +392,30 @@ const SingleBlog = () => {
           </div>
 
           <div className="flex items-center justify-between border-t border-[#003875] pt-4">
+              <div className='flex items-center gap-4 '>
             <div className="flex items-center space-x-2">
+
               <button
                 onClick={handleBlogLike}
                 className={`p-2 rounded-full ${
                   isLiked ? 'text-red-500' : 'text-gray-400'
                 } hover:bg-[#003875] transition-colors`}
-              >
+                >
                 <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
               </button>
               <span className="text-gray-400">{likesCount} likes</span>
             </div>
-            
+            <div className="flex items-center gap-1.5 text-gray-400">
+                  <Eye className="w-5 h-5" />
+                  <span className="text-sm">{blog.viewsCount || 0}</span>
+                </div>
+            </div>
             <div className="flex flex-wrap gap-2">
               {blog?.tags?.map((tag) => (
                 <span 
                   key={tag}
                   className="bg-[#001845] text-[#00B4D8] px-3 py-1 rounded-full text-sm"
-                >
+                  >
                   {tag}
                 </span>
               ))}
@@ -416,22 +424,23 @@ const SingleBlog = () => {
         </motion.article>
 
         <div className="mt-8">
-          <div className="flex space-x-4 mb-6">
-            <input
+          <div className="flex flex-col sm:flex-row sm:space-x-4 mb-6">
+            <textarea
               type="text"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Add a comment..."
-              className="flex-1 px-4 py-2 rounded-xl bg-[#002855] text-white border border-[#003875] focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8] outline-none"
+              className="flex-1 px-4 py-2 rounded-xl bg-[#002855] text-white border border-[#003875] focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8] outline-none mb-4 sm:mb-0 "
             />
             <button
               onClick={handleComment}
-              className="px-6 py-2 bg-[#00B4D8] text-white rounded-xl hover:bg-[#0096c7] transition-colors flex items-center"
+              className="px-6 py-2 h-12 bg-[#00B4D8] resize-none text-white rounded-xl hover:bg-[#0096c7] transition-colors flex items-center justify-center sm:w-auto w-full"
             >
               <Send className="w-4 h-4 mr-2" />
               Send
             </button>
           </div>
+
           <div className="relative min-w-[160px]">
               <SortAsc className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <select

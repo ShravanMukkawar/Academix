@@ -198,18 +198,18 @@ const Navbar = () => {
                                                 animate="open"
                                                 exit="closed"
                                             >
-                                                <Link
-                                                    to="/profile"
+                                                <a
+                                                    href='/profile'
                                                     className="block px-4 py-2 text-gray-300 hover:bg-gray-700 transition-colors duration-200 text-lg font-medium"
                                                 >
                                                     Profile
-                                                </Link>
-                                                <button
+                                                </a>
+                                                <a
                                                     onClick={handleLogout}
-                                                    className="w-full text-left px-4 py-2 text-gray-300 hover:bg-gray-700 transition-colors duration-200 text-lg font-medium"
+                                                    className="block px-4 py-2 text-gray-300 cursor-pointer hover:bg-gray-700 transition-colors duration-200 text-lg font-medium"
                                                 >
                                                     Logout
-                                                </button>
+                                                </a>
                                             </motion.div>
                                         )}
                                     </AnimatePresence>

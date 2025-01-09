@@ -39,10 +39,10 @@ const FeedbackPage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 py-6 px-4">
+        <div className="min-h-screen py-6 px-4 ">
             <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">Feedback from Our Users</h1>
 
-            <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
+            <div className="max-w-4xl mx-auto bg-gradient-to-b from-[#001233] to-[#001845] shadow-lg rounded-lg p-6">
                 {feedbackList.length === 0 ? (
                     <div className="text-center text-gray-600">No feedback available yet.</div>
                 ) : (
@@ -50,9 +50,9 @@ const FeedbackPage = () => {
                         <div key={feedback._id} className="mb-6 border-b pb-6">
                             <div className="flex items-center mb-4">
                                 <div className="font-semibold text-lg text-blue-500">{feedback.name}</div>
-                                <div className="ml-4 text-sm text-gray-500">{feedback.branch}</div>
+                                <div className="ml-4 text-sm text-white">{feedback.branch}</div>
                             </div>
-                            <div className="text-gray-700">{feedback.suggestion}</div>
+                            <div className="text-white">{feedback.suggestion}</div>
                         </div>
                     ))
                 )}
