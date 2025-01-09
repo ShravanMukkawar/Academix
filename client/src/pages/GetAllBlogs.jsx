@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Clock, X, Search, SortAsc, Plus, Heart, Eye } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, X, Search, SortAsc, Plus, Heart, Eye, Menu } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const BlogListing = () => {
@@ -13,6 +13,7 @@ const BlogListing = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [searchInputs, setSearchInputs] = useState({
     title: '',
     author: ''
@@ -29,7 +30,7 @@ const BlogListing = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
-    // Get current user ID from token or API
+    
     const getCurrentUser = async () => {
       try {
         const response = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/users/me`, {
@@ -42,7 +43,6 @@ const BlogListing = () => {
     };
     if (token) getCurrentUser();
   }, []);
-
 
   const fetchBlogs = async (page) => {
     try {
@@ -97,6 +97,7 @@ const BlogListing = () => {
       author: searchInputs.author
     }));
     setCurrentPage(1);
+    setShowFilters(false);
   };
 
   const handleAddTag = (e) => {
@@ -149,18 +150,18 @@ const BlogListing = () => {
       );
     }
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gradient-to-b from-[#001233] to-[#001845]">
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 bg-gradient-to-b from-[#001233] to-[#001845]">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-2xl bg-red-500/10 border border-red-500/20 rounded-2xl p-12 text-center backdrop-blur-sm"
+          className="w-full max-w-2xl bg-red-500/10 border border-red-500/20 rounded-2xl p-6 sm:p-12 text-center backdrop-blur-sm"
         >
           <motion.h1 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-4xl font-bold text-red-400 mb-6"
+            className="text-3xl sm:text-4xl font-bold text-red-400 mb-4 sm:mb-6"
           >
             Login Required
           </motion.h1>
@@ -168,7 +169,7 @@ const BlogListing = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="text-xl text-gray-300 mb-8"
+            className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8"
           >
             Please login or sign up to access Blogs Feature
           </motion.p>
@@ -176,7 +177,7 @@ const BlogListing = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="flex justify-center space-x-6"
+            className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6"
           >
             <Link 
               to="/signin" 
@@ -199,16 +200,25 @@ const BlogListing = () => {
   return (
     <div className="min-h-screen bg-[#001233] px-2 sm:px-4 md:px-6 lg:px-8 py-6 md:py-12">
       <div className="max-w-5xl mx-auto">
-        <motion.h1 
-          className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#00B4D8] mb-4 sm:mb-6 md:mb-8 text-center"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          Blog Posts
-        </motion.h1>
+        <div className="flex items-center justify-between mb-4 sm:mb-6 md:mb-8">
+          <motion.h1 
+            className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#00B4D8]"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            Blog Posts
+          </motion.h1>
+          
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="md:hidden p-2 rounded-lg bg-[#002855] text-[#00B4D8] hover:bg-[#003875] transition-colors"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
 
         {/* Search and Filter Section */}
-        <div className="mb-6 space-y-4">
+        <div className={`mb-6 space-y-4 transition-all duration-300 ${showFilters ? 'block' : 'hidden md:block'}`}>
           {/* Search Inputs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="relative">
@@ -266,7 +276,7 @@ const BlogListing = () => {
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={handleAddTag}
-                disabled={filters.tags.length>0}
+                disabled={filters.tags.length > 0}
                 className="pl-10 pr-4 py-2 rounded-xl bg-[#002855] text-white w-full border border-[#003875] focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8] outline-none"
               />
             </div>
@@ -306,109 +316,109 @@ const BlogListing = () => {
           </div>
         ) : (
           <div className="space-y-4 md:space-y-6">
-{blogs.length === 0 ? (
-        <div className="text-center py-20 text-gray-400">
-          No blogs found matching your criteria
-        </div>
-      ) : (
-        <div className="space-y-4 md:space-y-6">
-          {blogs.map((blog) => (
-            <motion.div
-              key={blog._id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-[#002855] rounded-xl p-4 md:p-6 shadow-lg border border-[#003875] hover:border-[#00B4D8] transition-colors"
-            >
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
-                <Link 
-                  to={`/blogs/${blog._id}`}
-                  className="group"
-                >
-                  <h2 className="text-xl md:text-2xl font-semibold text-[#00B4D8] group-hover:text-[#0096c7] transition-colors">
-                    {blog.title}
-                  </h2>
-                </Link>
-                <div className="text-gray-400 text-sm">
-                  <span className="mr-2">~</span>
-                  <span>{blog.author?.name || 'Unknown'}</span>
-                </div>
+            {blogs.length === 0 ? (
+              <div className="text-center py-20 text-gray-400">
+                No blogs found matching your criteria
               </div>
-
-              <div className="flex items-center justify-between text-gray-400 text-sm mt-2">
-                <div className="flex items-center">
-                  <Clock className="w-4 h-4 mr-2" />
-                  {formatDate(blog.createdAt)}
-                </div>
-              </div>
-
-              <p className="text-gray-300 my-4">
-                {truncateContent(blog.content)}
-              </p>
-
-              <div className="flex flex-wrap gap-2">
-                {blog.tags?.map((tag) => (
-                  <span 
-                    key={tag} 
-                    className="bg-[#001845] text-[#00B4D8] px-3 py-1 rounded-full text-sm"
+            ) : (
+              <div className="space-y-4 md:space-y-6">
+                {blogs.map((blog) => (
+                  <motion.div
+                    key={blog._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-[#002855] rounded-xl p-4 md:p-6 shadow-lg border border-[#003875] hover:border-[#00B4D8] transition-colors"
                   >
-                    {tag.charAt(0).toUpperCase() + tag.slice(1)}
-                  </span>
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
+                      <Link 
+                        to={`/blogs/${blog._id}`}
+                        className="group"
+                      >
+                        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-[#00B4D8] group-hover:text-[#0096c7] transition-colors line-clamp-2">
+                          {blog.title}
+                        </h2>
+                      </Link>
+                      <div className="text-gray-400 text-sm">
+                        <span className="mr-2">~</span>
+                        <span>{blog.author?.name || 'Unknown'}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-gray-400 text-sm mt-2">
+                      <div className="flex items-center">
+                        <Clock className="w-4 h-4 mr-2" />
+                        {formatDate(blog.createdAt)}
+                      </div>
+                    </div>
+
+                    <p className="text-gray-300 my-4 text-sm sm:text-base line-clamp-3">
+                      {truncateContent(blog.content)}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2">
+                      {blog.tags?.map((tag) => (
+                        <span 
+                          key={tag} 
+                          className="bg-[#001845] text-[#00B4D8] px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm"
+                        >
+                          {tag.charAt(0).toUpperCase() + tag.slice(1)}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Engagement Stats */}
+                    <div className="flex items-center gap-4 mt-4 pt-3 border-t border-[#003875]">
+                      <button
+                        className="flex items-center gap-1.5 group"
+                        disabled={!isLoggedIn}
+                      >
+                        <Heart
+                          className={`w-4 h-4 sm:w-5 sm:h-5 transform transition-all duration-200 group-hover:scale-110 ${
+                            blog.likes?.includes(currentUserId)
+                              ? 'fill-red-500 text-red-500' 
+                              : 'text-gray-400'
+                          }`}
+                        />
+                        <span className={`text-xs sm:text-sm ${
+                          blog.likes?.includes(currentUserId) 
+                            ? 'text-red-500' 
+                            : 'text-gray-400'
+                        }`}>
+                          {blog.likesCount || 0}
+                        </span>
+                      </button>
+
+                      <div className="flex items-center gap-1.5 text-gray-400">
+                        <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span className="text-xs sm:text-sm">{blog.viewsCount || 0}</span>
+                      </div>
+                    </div>
+                  </motion.div>
                 ))}
               </div>
-
-              {/* Engagement Stats */}
-              <div className="flex items-center gap-4 mt-4 pt-3 border-t border-[#003875]">
-                <button
-                  className="flex items-center gap-1.5 group"
-                  disabled={!isLoggedIn}
-                >
-                  <Heart
-                    className={`w-5 h-5 transform transition-all duration-200 group-hover:scale-110 ${
-                      blog.likes?.includes(currentUserId)
-                        ? 'fill-red-500 text-red-500' 
-                        : 'text-gray-400  '
-                    }`}
-                  />
-                  <span className={`text-sm ${
-                    blog.likes?.includes(currentUserId) 
-                      ? 'text-red-500' 
-                      : 'text-gray-400  '
-                  }`}>
-                    {blog.likesCount || 0}
-                  </span>
-                </button>
-
-                <div className="flex items-center gap-1.5 text-gray-400">
-                  <Eye className="w-5 h-5" />
-                  <span className="text-sm">{blog.viewsCount || 0}</span>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      )}
+            )}
 
             {/* Pagination */}
             {blogs.length > 0 && (
-              <div className="flex justify-center items-center space-x-4 mt-8">
+              <div className="flex justify-center items-center space-x-2 sm:space-x-4 mt-6 sm:mt-8">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="p-2 rounded-lg bg-[#002855] text-[#00B4D8] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#003875] transition-colors"
+                  className="p-1.5 sm:p-2 rounded-lg bg-[#002855] text-[#00B4D8] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#003875] transition-colors"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
 
-                <span className="text-white">
+                <span className="text-sm sm:text-base text-white">
                   Page {currentPage} of {totalPages}
                 </span>
 
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="p-2 rounded-lg bg-[#002855] text-[#00B4D8] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#003875] transition-colors"
+                  className="p-1.5 sm:p-2 rounded-lg bg-[#002855] text-[#00B4D8] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#003875] transition-colors"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
             )}
@@ -425,7 +435,7 @@ const BlogListing = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                className="absolute bottom-16 -translate-x-1/2 bg-[#002855] text-white px-3 py-1.5 rounded-lg text-sm whitespace-nowrap shadow-lg"
+                className="absolute bottom-16 -translate-x-1/2 bg-[#002855] text-white px-3 py-1.5 rounded-lg text-sm whitespace-nowrap shadow-lg hidden md:block"
               >
                 Create Blog
                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#002855] rotate-45" />
