@@ -27,7 +27,7 @@ if (process.env.NODE_ENV === "development") {
 }
 app.use(
   cors({
-    origin: "http://localhost:5173", // Replace with your frontend's origin
+    origin: process.env.FRONTEND_URL, // Replace with your frontend's origin
     credentials: true, // Allow credentials (cookies, authorization headers)
   })
 );
@@ -87,8 +87,8 @@ async function deleteUnverifiedUsers() {
 }
 
 cron.schedule('0 1 * * *', () => {
-    console.log('Running scheduled cleanup for unverified users...');
-    deleteUnverifiedUsers();
+  console.log('Running scheduled cleanup for unverified users...');
+  deleteUnverifiedUsers();
 });
 
 app.listen(PORT, () => {

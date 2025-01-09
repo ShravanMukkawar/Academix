@@ -96,11 +96,11 @@ exports.signup = catchAsync(async (req, res, next) => {
     const message = `Your OTP code is ${Emailotp}  . It will expire in 10 minutes.`;
     console.log(message);
     try {
-        // await sendEmail({
-        //     email: email,
-        //     subject: 'Your OTP for Signup (valid for 10 min)',
-        //     html: otpVerificationEmail(name, Emailotp)
-        // });
+        await sendEmail({
+            email: email,
+            subject: 'Your OTP for Signup (valid for 10 min)',
+            html: otpVerificationEmail(name, Emailotp)
+        });
 
     } catch (err) {
         // Clean up user data if email sending fails

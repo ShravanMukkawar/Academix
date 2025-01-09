@@ -46,16 +46,20 @@ const VerifyOtp = () => {
       });
 
       if (response.data.status === "success") {
-        const userData = response.data.data.oldUser;
-        dispatch(loginSuccess(userData));
+        //const userData = response.data.data.oldUser;
+        //dispatch(loginSuccess(userData));
+        localStorage.removeItem('token')
         toast.success("Email verification successful!");
         setData({ otp: "" });
-        navigate('/');
+        setTimeout(() => {
+          setData({ password: "", email: "" });
+          navigate('/signin');
+        }, 1000);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Verification failed. Please try again.");
       console.error("Verification error:", error);
-      navigate('/register');
+      navigate('/signin');
     }
   };
 
