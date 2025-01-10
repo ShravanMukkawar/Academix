@@ -106,7 +106,11 @@ const SignUp = () => {
     } catch (error) {
       if (error.response?.status === 401) {
         toast.error("Duplicate Email Found");
-      } else {
+      }else  if (error.response?.status === 400) {
+        toast.error("Passwords do not match!");
+      }else if (error.response?.status === 500) {
+        toast.error("There was an error sending the email. Try again later!");
+      }else {
         toast.error("Error occurred during registration");
       }
     }

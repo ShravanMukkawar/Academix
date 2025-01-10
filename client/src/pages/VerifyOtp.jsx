@@ -57,7 +57,12 @@ const VerifyOtp = () => {
         }, 1000);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Verification failed. Please try again.");
+      // toast.error(error.response?.data?.message || "Verification failed. Please try again.");
+      if (error.response?.status === 402) {
+        toast.error("You are not registered!");
+      }else  if (error.response?.status === 401) {
+        toast.error("Duplicate Email Found");
+      }
       console.error("Verification error:", error);
       navigate('/signin');
     }

@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Clock, X, Search, SortAsc, Plus, Heart, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
+import HTMLContent from '../components/HTMLContent';
 
 const BlogListing = () => {
   const [blogs, setBlogs] = useState([]);
@@ -338,11 +339,12 @@ const BlogListing = () => {
                 <div className="flex items-center">
                   <Clock className="w-4 h-4 mr-2" />
                   {formatDate(blog.createdAt)}
-                </div>
+                </div> 
               </div>
 
               <p className="text-gray-300 my-4">
-                {truncateContent(blog.content)}
+
+              <HTMLContent content={truncateContent(blog.content)} />
               </p>
 
               <div className="flex flex-wrap gap-2">
