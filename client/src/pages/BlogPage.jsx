@@ -16,7 +16,7 @@ const Comment = ({ comment, onReply, onDelete, onLike, onUpdate, allComments, de
   
   const replies = allComments.filter(c => c.parentComment === comment._id);
   console.log('Parent Comment IDs:', allComments.map(c => c.parentComment));
-console.log('Current Comment ID:', comment._id);
+  console.log('Current Comment ID:', comment._id);
 
 
   const handleReplySubmit = () => {
