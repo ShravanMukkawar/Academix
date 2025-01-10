@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Heart, Clock, Send, ChevronDown, ChevronUp, Reply, Trash, Edit, Check, X, SortAsc, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 import HTMLContent from '../components/HTMLContent';
+import RichTextEditor from '../components/Editor';
 
 const Comment = ({ comment, onReply, onDelete, onLike, onUpdate, allComments, depth = 0 }) => {
   const [showReplies, setShowReplies] = useState(false);
@@ -177,6 +178,7 @@ const Comment = ({ comment, onReply, onDelete, onLike, onUpdate, allComments, de
 
 const SingleBlog = () => {
   const { blogId } = useParams();
+  const navigate = useNavigate();
   const [blog, setBlog] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -185,11 +187,16 @@ const SingleBlog = () => {
   const [likesCount, setLikesCount] = useState(0);
   const [viewsCount, setViewsCount] = useState(0);
   const [sort, setSort] = useState('-createdAt');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState('');
+  const [editedContent, setEditedContent] = useState('');
+  const [editedTags, setEditedTags] = useState([]);
+  const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
     fetchBlog();
     fetchComments();
-  }, [blogId,sort]);
+  }, [blogId, sort]);
 
   const fetchBlog = async () => {
     try {
@@ -355,6 +362,55 @@ const SingleBlog = () => {
     }
   };
 
+    const handleUpdateBlog = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        await axios.patch(
+          `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/blogs/${blogId}`,
+          {
+            title: editedTitle,
+            content: editedContent,
+            tags: editedTags
+          },
+          {
+            withCredentials: true,
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        setIsEditing(false);
+        await fetchBlog();
+        toast.success("Blog updated successfully");
+      } catch (error) {
+        toast.error("Failed to update blog");
+      }
+    };
+
+  const handleDeleteBlog = async () => {
+    if (!window.confirm('Are you sure you want to delete this blog?')) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/blogs/${blogId}`,
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      toast.success("Blog deleted successfully");
+      navigate('/blogs'); // Navigate back to blogs list
+    } catch (error) {
+      toast.error("Failed to delete blog");
+    }
+  };
+
+  const startEditing = () => {
+    setEditedTitle(blog.title);
+    setEditedContent(blog.content);
+    setEditedTags(blog.tags);
+    setIsEditing(true);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#001233] flex justify-center items-center">
@@ -373,57 +429,128 @@ const SingleBlog = () => {
         <motion.article
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-[#002855] rounded-xl p-8 shadow-lg border border-[#003875]"
-        >
-          <h1 className="text-4xl font-bold text-[#00B4D8] mb-4">{blog?.title}</h1>
-          
-          <div className="flex items-center justify-between mb-6">
-            <div className="text-gray-400">
-              <span className="mr-2">By</span>
-              <span className="text-[#00B4D8]">{blog?.author?.name}</span>
-            </div>
-            <div className="flex items-center text-gray-400">
-              <Clock className="w-4 h-4 mr-2" />
-              {formatDate(blog.createdAt)}
-            </div>
-          </div>
-
-          <div className="prose prose-invert max-w-none mb-6">
-            <HTMLContent content={blog?.content} />
-          </div>
-
-          <div className="flex items-center justify-between border-t border-[#003875] pt-4">
-              <div className='flex items-center gap-4 '>
-            <div className="flex items-center space-x-2">
-
-              <button
-                onClick={handleBlogLike}
-                className={`p-2 rounded-full ${
-                  isLiked ? 'text-red-500' : 'text-gray-400'
-                } hover:bg-[#003875] transition-colors`}
-                >
-                <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
-              </button>
-              <span className="text-gray-400">{likesCount} likes</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-gray-400">
-                  <Eye className="w-5 h-5" />
-                  <span className="text-sm">{blog.viewsCount || 0}</span>
-                </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {blog?.tags?.map((tag) => (
-                <span 
-                  key={tag}
-                  className="bg-[#001845] text-[#00B4D8] px-3 py-1 rounded-full text-sm"
+          className=" rounded-xl p-8 shadow-lg "
+          >
+          {isEditing ? (
+            <div className="space-y-4">
+              <div className="px-8 py-6 bg-gradient-to-r from-[#001845] to-[#002855]">
+                          <motion.h2 
+                            className="text-3xl font-bold text-[#00B4D8] text-center"
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                          >
+                            Update Your Blog
+                          </motion.h2>
+                        </div>
+              <input
+                type="text"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="w-full px-4 py-2 bg-[#001845] text-white border border-[#003875] rounded-lg"
+                placeholder="Blog title"
+                />
+              <RichTextEditor
+                value={editedContent}
+                onChange={setEditedContent}
+                label="Blog Content"
+                minHeight="400px"
+                placeholder="Write your blog content here..."
+              />
+              <input
+                type="text"
+                value={editedTags.join(', ')}
+                onChange={(e) => setEditedTags(e.target.value.split(',').map(tag => tag.trim()))}
+                className="w-full px-4 py-2 bg-[#001845] text-white border border-[#003875] rounded-lg"
+                placeholder="Tags (comma-separated)"
+                />
+              <div className="flex justify-end items-center space-x-2">
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="p-2 text-gray-400 hover:text-red-500"
                   >
-                  {tag}
-                </span>
-              ))}
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpdateBlog}
+                  className="p-2 text-gray-400 hover:text-green-500"
+                  >
+                  Update
+                </button>
+              </div>
             </div>
-          </div>
-        </motion.article>
+          ) : (
+            <>
 
+            <div className='border p-6 rounded-xl bg-[#002855] border-[#003875]'>
+              <div className="flex justify-between items-start ">
+                <h1 className="text-4xl font-bold text-[#00B4D8] mb-4">{blog?.title}</h1>
+                {blog?.author?._id === user._id && (
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={startEditing}
+                      className="text-gray-400 hover:text-[#00B4D8] transition-colors"
+                    >
+                      <Edit className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={handleDeleteBlog}
+                      className="text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                      <Trash className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex items-center justify-between mb-6">
+                <div className="text-gray-400">
+                  <span className="mr-2">By</span>
+                  <span className="text-[#00B4D8]">{blog?.author?.name}</span>
+                </div>
+                <div className="flex items-center text-gray-400">
+                  <Clock className="w-4 h-4 mr-2" />
+                  {formatDate(blog.createdAt)}
+                </div>
+              </div>
+  
+              <div className="prose prose-invert max-w-none mb-6">
+                <HTMLContent content={blog?.content} />
+              </div>
+  
+              <div className="flex items-center justify-between border-t border-[#003875] pt-4">
+                <div className='flex items-center gap-4'>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={handleBlogLike}
+                      className={`p-2 rounded-full ${
+                        isLiked ? 'text-red-500' : 'text-gray-400'
+                      } hover:bg-[#003875] transition-colors`}
+                    >
+                      <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
+                    </button>
+                    <span className="text-gray-400">{likesCount} likes</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-gray-400">
+                    <Eye className="w-5 h-5" />
+                    <span className="text-sm">{blog.viewsCount || 0}</span>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {blog?.tags?.map((tag) => (
+                    <span 
+                    key={tag}
+                      className="bg-[#001845] text-[#00B4D8] px-3 py-1 rounded-full text-sm"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              </div>
+
+
+  
         <div className="mt-8">
           <div className="flex flex-col sm:flex-row sm:space-x-4 mb-6">
             <textarea
@@ -431,7 +558,7 @@ const SingleBlog = () => {
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Add a comment..."
-              className="flex-1 px-4 py-2 rounded-xl bg-[#002855] text-white border border-[#003875] focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8] outline-none mb-4 sm:mb-0 "
+              className="flex-1 px-4 py-2 rounded-xl bg-[#002855] text-white border border-[#003875] focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8] outline-none mb-4 sm:mb-0"
             />
             <button
               onClick={handleComment}
@@ -442,33 +569,38 @@ const SingleBlog = () => {
             </button>
           </div>
 
+  
           <div className="relative min-w-[160px]">
-              <SortAsc className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value)}
-                className="pl-10 pr-4 py-2 rounded-xl bg-[#002855] text-white w-full border border-[#003875] focus:border-[#00B4D8] outline-none appearance-none"
-              >
-                <option value="-createdAt">Newest First</option>
-                <option value="createdAt">Oldest First</option>
-                <option value="title">Title A-Z</option>
-                <option value="-title">Title Z-A</option>
-              </select>
-            </div>
+            <SortAsc className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className="pl-10 pr-4 py-2 rounded-xl bg-[#002855] text-white w-full border border-[#003875] focus:border-[#00B4D8] outline-none appearance-none"
+            >
+              <option value="-createdAt">Newest First</option>
+              <option value="createdAt">Oldest First</option>
+              <option value="title">Title A-Z</option>
+              <option value="-title">Title Z-A</option>
+            </select>
+          </div>
+  
           <div className="space-y-4">
             {comments.filter(c => !c.parentComment).map((comment) => (
               <Comment
-                key={comment._id}
+              key={comment._id}
                 comment={comment}
                 onReply={handleReply}
                 onDelete={handleDeleteComment}
                 onLike={handleCommentLike}
                 onUpdate={handleUpdateComment}
                 allComments={comments}
-              />
-            ))}
+                />
+              ))}
           </div>
         </div>
+              </>
+            )}
+          </motion.article>
       </div>
     </div>
   );

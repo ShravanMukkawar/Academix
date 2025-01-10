@@ -1,13 +1,13 @@
-import React, { useState, useRef } from 'react';
-import { Pencil, Tags, Send, Bold, Italic, AlignLeft, AlignCenter, AlignRight, List, Heading1, Heading2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Pencil, Tags, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import RichTextEditor from '../components/Editor';
 
 const CreateBlog = () => {
   const navigate = useNavigate();
-  const editorRef = useRef(null);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -24,59 +24,13 @@ const CreateBlog = () => {
     }));
   };
 
-  const handleEditorChange = () => {
-    if (editorRef.current) {
-      setFormData(prev => ({
-        ...prev,
-        content: editorRef.current.innerHTML
-      }));
-    }
+  const handleContentChange = (newContent) => {
+    setFormData(prev => ({
+      ...prev,
+      content: newContent
+    }));
   };
 
-  const formatDoc = (cmd, value = null) => {
-    document.execCommand(cmd, false, value);
-    if (editorRef.current) {
-      editorRef.current.focus();
-    }
-    handleEditorChange();
-  };
-
-  const addLink = () => {
-    const selection = window.getSelection();
-    let displayText = selection.toString() || '';
-    
-    // Create a dialog for link input
-    const url = prompt('Enter URL:', 'https://');
-    if (url) {
-      if (!displayText) {
-        displayText = prompt('Enter display text:', url) || url;
-      }
-      
-      // If there's no selection, insert new text
-      if (!selection.toString()) {
-        const linkElement = document.createElement('a');
-        linkElement.href = url;
-        linkElement.textContent = displayText;
-        linkElement.target = '_blank'; // Open in new tab
-        linkElement.rel = 'noopener noreferrer'; // Security best practice
-        
-        const range = selection.getRangeAt(0);
-        range.insertNode(linkElement);
-      } else {
-        // If there's a selection, wrap it in a link
-        formatDoc('createLink', url);
-        // Get the newly created link and update its properties
-        const link = selection.anchorNode.parentNode;
-        if (link.tagName === 'A') {
-          link.target = '_blank';
-          link.rel = 'noopener noreferrer';
-        }
-      }
-      handleEditorChange();
-    }
-  };
-
-  // Rest of your existing functions (handleAddTag, removeTag, handleSubmit)
   const handleAddTag = (e) => {
     e.preventDefault();
     if (currentTag.trim() && !formData.tags.includes(currentTag.trim())) {
@@ -97,9 +51,14 @@ const CreateBlog = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    if (!formData.title.trim() || !formData.content.trim()) {
+      toast.error("Title and content are required!");
+      return;
+    }
 
+    setIsSubmitting(true);
     const URL = `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/blogs`;
+    
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(URL, formData, {
@@ -112,26 +71,19 @@ const CreateBlog = () => {
       if (response.data.status === "success") {
         toast.success("Blog post created successfully!");
         setTimeout(() => {
-          setFormData({
-            title: '',
-            content: '',
-            tags: []
-          });
           navigate('/blogs');
         }, 1000);
-      } else {
-        toast.error("Failed to create blog post");
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Error creating blog post");
-      console.error(">>", error);
+      console.error("Error creating blog:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-[#001233] px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+    <div className="min-h-[calc(100vh-5rem)] bg-[#001233] px-4 sm:px-6 lg:px-8 flex items-center justify-center py-8">
       <motion.div 
         className="w-full max-w-3xl"
         initial={{ opacity: 0, y: 20 }}
@@ -163,101 +115,19 @@ const CreateBlog = () => {
                   value={formData.title}
                   onChange={handleChange}
                   className="w-full px-4 py-3 rounded-xl bg-[#001845] border border-[#003875] text-white focus:border-[#00B4D8] focus:ring-2 focus:ring-[#00B4D8] outline-none"
+                  placeholder="Enter your blog title..."
                   required
                 />
               </motion.div>
 
               {/* Rich Text Editor */}
-              <motion.div className="space-y-2" whileHover={{ scale: 1.01 }}>
-                <label className="flex items-center text-sm font-medium text-gray-300">
-                  <Pencil className="w-4 h-4 mr-2 text-[#00B4D8]" />
-                  Content
-                </label>
-                
-                {/* Toolbar */}
-                <div className="flex flex-wrap gap-2 mb-2 bg-[#001845] p-2 rounded-t-xl border border-b-0 border-[#003875]">
-                  <button
-                    type="button"
-                    onClick={() => formatDoc('bold')}
-                    className="p-2 text-gray-300 hover:text-[#00B4D8] rounded"
-                    title="Bold"
-                  >
-                    <Bold className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => formatDoc('italic')}
-                    className="p-2 text-gray-300 hover:text-[#00B4D8] rounded"
-                    title="Italic"
-                  >
-                    <Italic className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => formatDoc('formatBlock', 'h2')}
-                    className="p-2 text-gray-300 hover:text-[#00B4D8] rounded"
-                    title="Heading 1"
-                  >
-                    <Heading1 className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => formatDoc('formatBlock', 'h3')}
-                    className="p-2 text-gray-300 hover:text-[#00B4D8] rounded"
-                    title="Heading 1"
-                  >
-                    <Heading1 className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => formatDoc('formatBlock', 'h4')}
-                    className="p-2 text-gray-300 hover:text-[#00B4D8] rounded"
-                    title="Heading 2"
-                  >
-                    <Heading2 className="w-4 h-4" />
-                  </button>
-                  
-                  <button
-                    type="button"
-                    onClick={() => formatDoc('justifyLeft')}
-                    className="p-2 text-gray-300 hover:text-[#00B4D8] rounded"
-                    title="Align Left"
-                  >
-                    <AlignLeft className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => formatDoc('justifyCenter')}
-                    className="p-2 text-gray-300 hover:text-[#00B4D8] rounded"
-                    title="Align Center"
-                  >
-                    <AlignCenter className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => formatDoc('justifyRight')}
-                    className="p-2 text-gray-300 hover:text-[#00B4D8] rounded"
-                    title="Align Right"
-                  >
-                    <AlignRight className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={addLink}
-                    className="p-2 text-gray-300 hover:text-[#00B4D8] rounded"
-                    title="Add Link"
-                  >
-                    Link
-                  </button>
-                </div>
-
-                {/* Editable Content Area */}
-                <div
-                  ref={editorRef}
-                  contentEditable="true"
-                  onInput={handleEditorChange}
-                  className="w-full px-4 py-3 rounded-b-xl bg-[#001845] border border-[#003875] text-white focus:border-[#00B4D8] focus:ring-2 focus:ring-[#00B4D8] outline-none min-h-[200px] overflow-auto resize-y"
-                  style={{ minHeight: '200px' }}
+              <motion.div whileHover={{ scale: 1.01 }}>
+                <RichTextEditor
+                  value={formData.content}
+                  onChange={handleContentChange}
+                  label="Content"
+                  minHeight="300px"
+                  placeholder="Write your blog post here..."
                 />
               </motion.div>
 
@@ -271,13 +141,19 @@ const CreateBlog = () => {
                   <input
                     value={currentTag}
                     onChange={(e) => setCurrentTag(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddTag(e);
+                      }
+                    }}
                     className="w-full px-4 py-3 rounded-xl bg-[#001845] border border-[#003875] text-white focus:border-[#00B4D8] focus:ring-2 focus:ring-[#00B4D8] outline-none"
-                    placeholder="Add a tag"
+                    placeholder="Add a tag and press Enter..."
                   />
                   <button
                     onClick={handleAddTag}
                     type="button"
-                    className="px-4 py-2 bg-[#00B4D8] rounded-xl text-white hover:bg-[#0096c7]"
+                    className="px-4 py-2 bg-[#00B4D8] rounded-xl text-white hover:bg-[#0096c7] transition-colors"
                   >
                     Add
                   </button>
@@ -307,7 +183,7 @@ const CreateBlog = () => {
               <motion.button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-[#00B4D8] hover:bg-[#0096c7] text-white px-6 py-3 rounded-xl font-medium flex items-center justify-center space-x-2"
+                className="w-full bg-[#00B4D8] hover:bg-[#0096c7] text-white px-6 py-3 rounded-xl font-medium flex items-center justify-center space-x-2 transition-colors disabled:opacity-70"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
