@@ -10,9 +10,6 @@ const YouTubePlaylist = () => {
   const queryParams = new URLSearchParams(location.search);
   const from = parseInt(queryParams.get('from'), 10) || 0;
   const to = parseInt(queryParams.get('to'), 10) || 0;
-  console.log(from, to);
-  console.log(PLAYLIST_ID);
-  console.log("APi:",API_KEY)
 
   const [videos, setVideos] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);

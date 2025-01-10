@@ -53,7 +53,6 @@ const SignIn = () => {
       }
     } catch (error) {
       toast.error("Please check your email and password");
-      console.log(">>", error);
     }
   };
 

@@ -24,7 +24,6 @@ const Home = () => {
         
         
         fetchEvents();
-        console.log(events)
     }, []);
 
     const containerVariants = {
