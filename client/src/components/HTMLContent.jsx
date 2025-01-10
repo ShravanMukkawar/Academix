@@ -10,7 +10,7 @@ const HTMLContent = ({ content }) => {
 
   return (
     <div 
-      className="prose prose-invert max-w-none mb-6"
+      className="prose prose-invert max-w-none mb-6 prose-p:whitespace-pre-wrap prose-p:break-words prose-p:text-base sm:prose-p:text-lg prose-p:leading-relaxed prose-headings:leading-normal prose-li:my-1 prose-ul:space-y-2 prose-ol:space-y-2"
       dangerouslySetInnerHTML={createMarkup(content)}
       style={{
         '--tw-prose-body': 'var(--tw-prose-invert-body)',
@@ -26,6 +26,9 @@ const HTMLContent = ({ content }) => {
         '--tw-prose-code': 'var(--tw-prose-invert-code)',
         '--tw-prose-pre-code': 'var(--tw-prose-invert-pre-code)',
         '--tw-prose-pre-bg': 'var(--tw-prose-invert-pre-bg)',
+        maxWidth: '100%',
+        overflowWrap: 'break-word',
+        wordBreak: 'break-word'
       }}
     />
   );
