@@ -46,8 +46,6 @@ const VerifyOtp = () => {
       });
 
       if (response.data.status === "success") {
-        //const userData = response.data.data.oldUser;
-        //dispatch(loginSuccess(userData));
         localStorage.removeItem('token')
         toast.success("Email verification successful!");
         setData({ otp: "" });
@@ -57,10 +55,9 @@ const VerifyOtp = () => {
         }, 1000);
       }
     } catch (error) {
-      // toast.error(error.response?.data?.message || "Verification failed. Please try again.");
       if (error.response?.status === 402) {
         toast.error("You are not registered!");
-      }else  if (error.response?.status === 401) {
+      } else if (error.response?.status === 401) {
         toast.error("Duplicate Email Found");
       }
       console.error("Verification error:", error);
@@ -92,9 +89,19 @@ const VerifyOtp = () => {
               <HiOutlineMail className='w-8 h-8 text-[#0094c6]' />
             </motion.div>
             <h1 className='text-2xl font-bold text-[#0094c6] text-center'>Email Verification</h1>
-            <p className='mt-2 text-center text-gray-400 text-sm'>
-              We've sent a verification code to your email address. Please check your inbox and enter the code below.
+            <p className='mt-2 text-center text-gray-400 text-base font-medium'>
+              We've sent a verification code to your email address.
             </p>
+            <div className='mt-3 p-4 bg-[#0094c6]/10 rounded-lg'>
+              <p className='text-center text-[#0094c6] text-lg font-semibold'>
+                Important Notice:
+              </p>
+              <p className='mt-2 text-center text-white text-base'>
+                Please allow 2-3 minutes for delivery.
+                <br />
+                Check your spam/junk folder!
+              </p>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className='space-y-6'>
